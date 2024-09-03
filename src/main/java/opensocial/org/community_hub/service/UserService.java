@@ -1,20 +1,19 @@
 package opensocial.org.community_hub.service;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import opensocial.org.community_hub.entity.User;
 import opensocial.org.community_hub.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    @Getter
     private final BCryptPasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -23,5 +22,9 @@ public class UserService {
 
     public User findByLoginId(String loginId) {
         return userRepository.findByLoginId(loginId);
+    }
+
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 }
