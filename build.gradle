@@ -24,6 +24,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//스웨거 종속성
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+	//서버 가동용 임시 H2 데이터베이스 추가
+	implementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
