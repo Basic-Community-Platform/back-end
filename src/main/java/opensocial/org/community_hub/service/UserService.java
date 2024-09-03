@@ -7,6 +7,8 @@ import opensocial.org.community_hub.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -20,7 +22,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findByLoginId(String loginId) {
+    public Optional<User> findByLoginId(String loginId) {
         return userRepository.findByLoginId(loginId);
     }
 

@@ -5,6 +5,8 @@ import opensocial.org.community_hub.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -17,20 +19,25 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        // 추후 예외처리 코드 추가
+    public ResponseEntity<String> registerUser(@RequestBody User user) {
+        // 로그인 아이디 중복 확인
+        Optional<User> existingUser = userService.findByLoginId(user.getLoginId());
+        if (existingUser.isPresent()) {
+            return ResponseEntity.badRequest().body("Login ID already exists");
+        }
+        // 비밀번호가 비어있는 경우 예외 처리
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Password cannot be empty");
         }
         User newUser = userService.registerUser(user);
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
-        User existingUser = userService.findByLoginId(user.getLoginId());
-        if (existingUser != null && userService.getPasswordEncoder().matches(user.getPassword(), existingUser.getPassword())) {
+        Optional<User> existingUser = userService.findByLoginId(user.getLoginId());
+        if (existingUser != null && userService.getPasswordEncoder().matches(user.getPassword(), existingUser.get().getPassword())) {
             return ResponseEntity.ok("Login successful");
         }
         return ResponseEntity.status(401).body("Invalid login credentials");
