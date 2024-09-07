@@ -2,6 +2,7 @@ package opensocial.org.community_hub.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import opensocial.org.community_hub.dto.TokenResponse;
 import opensocial.org.community_hub.entity.User;
 import opensocial.org.community_hub.repository.UserRepository;
 import opensocial.org.community_hub.util.JwtTokenUtil;
@@ -33,7 +34,7 @@ public class UserService {
         return userRepository.findById(userId).orElse(null);
     }
 
-    public String login(User user) {
+    public TokenResponse login(User user) {
         Optional<User> existingUser = userRepository.findByLoginId(user.getLoginId());
 
         if (!existingUser.isPresent()) {
@@ -44,12 +45,11 @@ public class UserService {
         if (passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
             System.out.println("Password matches! Generating JWT...");
             try {
-                // JWT 토큰 발급
-                // 현재 loginId로 토큰 발급
-                String token = jwtTokenUtil.generateToken(existingUser.get().getLoginId());
+                // loginId로 토큰 발급
+                String accessToken = jwtTokenUtil.generateToken(existingUser.get().getLoginId());
+                String refreshToken = jwtTokenUtil.generateRefreshToken(existingUser.get().getLoginId());
 
-                System.out.println("Generated JWT Token: " + token); // 토큰이 제대로 생성되는지 확인
-                return token;
+                return new TokenResponse(accessToken, refreshToken);
             } catch (Exception e) {
                 // 예외가 발생하면 로그 출력
                 e.printStackTrace();
