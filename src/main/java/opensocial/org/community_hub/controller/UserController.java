@@ -1,7 +1,11 @@
 package opensocial.org.community_hub.controller;
 
+import opensocial.org.community_hub.dto.TokenResponse;
+import opensocial.org.community_hub.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.entity.User;
 import opensocial.org.community_hub.service.UserService;
+import opensocial.org.community_hub.util.JwtTokenUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,9 +20,11 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtTokenUtil jwtTokenUtil) {
         this.userService = userService;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @PostMapping("/register")
@@ -39,15 +45,33 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         try {
-            String token = userService.login(user);  // JWT 토큰 생성
+            TokenResponse tokenResponse = userService.login(user);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("userId", userService.findByLoginId(user.getLoginId()).get().getUserId());
+            response.put("accessToken", tokenResponse.getAccessToken());
+            response.put("refreshToken", tokenResponse.getRefreshToken());
 
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Invalid login credentials");
+        }
+    }
+
+    //액세스 토큰 만료 시 리프레쉬 토큰으로 액세스 토큰 재발급
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        try {
+            String username = jwtTokenUtil.extractUsername(request.getRefreshToken());
+
+            if (username != null && jwtTokenUtil.validateToken(request.getRefreshToken(), username)) {
+                String newToken = jwtTokenUtil.generateToken(username);
+                return ResponseEntity.ok(new TokenResponse(newToken, request.getRefreshToken()));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // 로그에 스택 트레이스를 출력합니다.
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error refreshing token");
         }
     }
 
