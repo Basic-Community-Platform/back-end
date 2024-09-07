@@ -1,4 +1,4 @@
-HELP.md
+# Ignore build files and directories
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Security ###
+/src/main/resources/security-application.properties
