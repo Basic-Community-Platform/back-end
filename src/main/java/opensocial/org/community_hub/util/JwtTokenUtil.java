@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import opensocial.org.community_hub.config.JwtConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +15,15 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
 
-    @Value("${jwt.secret}")
-    private String SECRET_KEY;
+    private final JwtConfig jwtConfig;
+
+    public JwtTokenUtil(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
 
     // 서명에 사용할 키 반환
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
     }
 
     // JWT에서 사용자 이름 추출 (해당 앱에선 loginId 추출)
@@ -50,12 +54,12 @@ public class JwtTokenUtil {
 
     // JWT 액세스 토큰 생성
     public String generateToken(String username) {
-        return generateToken(username, 6 * 60 * 60 * 1000L); // 6시간 유효기간
+        return generateToken(username, jwtConfig.getAccessTokenExpireTime()); // 6시간 유효기간
     }
 
     // JWT 리프레시 토큰 생성
     public String generateRefreshToken(String username) {
-        return generateToken(username, 7 * 24 * 60 * 60 * 1000L); // 7일 유효기간
+        return generateToken(username, jwtConfig.getRefreshTokenExpireTime()); // 7일 유효기간
     }
 
     // JWT 토큰 생성
