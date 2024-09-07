@@ -36,5 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-### Security ###
-/src/main/resources/security-application.properties
+### Prolerties ###
+/src/main/resources/jwt.properties
