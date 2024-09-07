@@ -25,8 +25,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())  // CSRF 비활성화
+
+                //디버깅용 스웨거 경로 허용. 추후 제거하기!
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/register").permitAll()  // 로그인과 회원가입은 모두 허용
+                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/refresh", "/swagger-ui/index.html").permitAll()  // 로그인과 회원가입, 리프레쉬 발급은 모두 허용
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 세션을 사용하지 않음 (JWT 사용)
