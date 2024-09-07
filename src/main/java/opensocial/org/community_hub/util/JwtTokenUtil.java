@@ -48,13 +48,23 @@ public class JwtTokenUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    // JWT 액세스 토큰 생성
+    public String generateToken(String username) {
+        return generateToken(username, 6 * 60 * 60 * 1000L); // 6시간 유효기간
+    }
+
+    // JWT 리프레시 토큰 생성
+    public String generateRefreshToken(String username) {
+        return generateToken(username, 7 * 24 * 60 * 60 * 1000L); // 7일 유효기간
+    }
+
     // JWT 토큰 생성
-    public String generateToken(String loginId) {
+    private String generateToken(String username, long expirationTime) {
         return Jwts.builder()
-                .setSubject(loginId)  // 사용자 이름 (또는 ID)
-                .setIssuedAt(new Date(System.currentTimeMillis()))  // 발행 시간
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))  // 10시간 유효기간
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // 비밀 키로 서명
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
