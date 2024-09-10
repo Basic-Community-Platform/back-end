@@ -27,4 +27,9 @@ public class Post {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    // User와의 관계 설정
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
