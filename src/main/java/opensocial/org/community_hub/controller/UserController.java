@@ -3,6 +3,7 @@ package opensocial.org.community_hub.controller;
 import opensocial.org.community_hub.dto.TokenResponse;
 import opensocial.org.community_hub.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.entity.User;
+import opensocial.org.community_hub.service.CustomUserDetailsService;
 import opensocial.org.community_hub.service.UserService;
 import opensocial.org.community_hub.util.JwtTokenUtil;
 import org.springframework.http.HttpStatus;
@@ -20,10 +21,12 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public UserController(UserService userService, JwtTokenUtil jwtTokenUtil) {
+    public UserController(UserService userService, CustomUserDetailsService customUserDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.userService = userService;
+        this.customUserDetailsService = customUserDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
@@ -63,14 +66,16 @@ public class UserController {
         try {
             String username = jwtTokenUtil.extractUsername(request.getRefreshToken());
 
-            if (username != null && jwtTokenUtil.validateToken(request.getRefreshToken(), username)) {
-                String newToken = jwtTokenUtil.generateToken(username);
-                return ResponseEntity.ok(new TokenResponse(newToken, request.getRefreshToken()));
+            // 유효한 리프레시 토큰인지 검증
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+            if (jwtTokenUtil.validateToken(request.getRefreshToken(), userDetails)) {
+                String newAccessToken = jwtTokenUtil.generateToken(userDetails);
+                return ResponseEntity.ok(new TokenResponse(newAccessToken, request.getRefreshToken()));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
             }
         } catch (Exception e) {
-            e.printStackTrace(); // 로그에 스택 트레이스를 출력합니다.
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error refreshing token");
         }
     }
