@@ -14,32 +14,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+
+import java.util.Collections;
 
 @Configuration
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
-    private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter, CorsConfigurationSource corsConfigurationSource) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
-        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())  // CSRF 비활성화
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))  // CORS 설정 적용
-                //디버깅용 스웨거 경로 허용. 추후 제거하기!
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // 로그인과 회원가입, 리프레쉬 발급은 모두 허용
-                        .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
+                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // 허용 경로 설정
+                        .anyRequest().authenticated()  // 나머지 요청은 인증 필요
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 세션을 사용하지 않음 (JWT 사용)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 세션 비활성화 (JWT 사용)
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);  // JWT 필터 추가
-        
+
         return http.build();
     }
 
@@ -54,14 +52,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // 자격 증명 허용
-        config.addAllowedOriginPattern("*"); // 모든 출처 허용
-        config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        config.setAllowCredentials(true);  // 자격 증명 허용
+        config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));  // 도메인 설정
+        config.setAllowedMethods(Collections.singletonList("*"));  // 모든 HTTP 메서드 허용
+        config.setAllowedHeaders(Collections.singletonList("*"));  // 모든 헤더 허용
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);  // 모든 경로에 대해 CORS 설정 적용
+        return source;
     }
 }
