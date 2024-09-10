@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import opensocial.org.community_hub.config.JwtConfig;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -51,14 +52,14 @@ public class JwtTokenUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // JWT 액세스 토큰 생성
-    public String generateToken(String username) {
-        return generateToken(username, jwtConfig.getAccessTokenExpireTime()); // 6시간 유효기간
+    // JWT 액세스 토큰 생성 (UserDetails 기반)
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails.getUsername(), jwtConfig.getAccessTokenExpireTime()); // 6시간 유효기간
     }
 
-    // JWT 리프레시 토큰 생성
-    public String generateRefreshToken(String username) {
-        return generateToken(username, jwtConfig.getRefreshTokenExpireTime()); // 7일 유효기간
+    // JWT 리프레시 토큰 생성 (UserDetails 기반)
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateToken(userDetails.getUsername(), jwtConfig.getRefreshTokenExpireTime()); // 7일 유효기간
     }
 
     // JWT 토큰 생성
@@ -71,9 +72,9 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    // JWT 토큰이 유효한지 확인
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    // 토큰의 유효성을 검사 (UserDetails와 비교)
+    public boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
