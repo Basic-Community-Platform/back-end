@@ -1,6 +1,7 @@
 package opensocial.org.community_hub.domain.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.service.PostService;
 import opensocial.org.community_hub.domain.user.entity.User;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -54,5 +56,12 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
         postService.deletePost(postId, user);
         return ResponseEntity.noContent().build();
+    }
+
+    // username, title, content 중 선택하여 게시글 검색
+    @PostMapping("/search")
+    public ResponseEntity<List<Post>> searchPosts(@RequestBody SearchRequest searchRequest) {
+        List<Post> posts = postService.searchPosts(searchRequest);
+        return ResponseEntity.ok(posts);
     }
 }
