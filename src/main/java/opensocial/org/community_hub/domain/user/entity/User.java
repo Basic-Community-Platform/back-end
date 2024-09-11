@@ -1,4 +1,4 @@
-package opensocial.org.community_hub.entity;
+package opensocial.org.community_hub.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

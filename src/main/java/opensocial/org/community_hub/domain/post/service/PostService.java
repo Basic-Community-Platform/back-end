@@ -1,8 +1,8 @@
-package opensocial.org.community_hub.service;
+package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.entity.Post;
-import opensocial.org.community_hub.repository.PostRepository;
+import opensocial.org.community_hub.domain.post.entity.Post;
+import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

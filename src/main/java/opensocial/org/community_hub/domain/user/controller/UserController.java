@@ -1,10 +1,10 @@
-package opensocial.org.community_hub.controller;
+package opensocial.org.community_hub.domain.user.controller;
 
-import opensocial.org.community_hub.dto.TokenResponse;
-import opensocial.org.community_hub.dto.RefreshTokenRequest;
-import opensocial.org.community_hub.entity.User;
-import opensocial.org.community_hub.service.CustomUserDetailsService;
-import opensocial.org.community_hub.service.UserService;
+import opensocial.org.community_hub.domain.user.dto.TokenResponse;
+import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
+import opensocial.org.community_hub.domain.user.entity.User;
+import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
+import opensocial.org.community_hub.domain.user.service.UserService;
 import opensocial.org.community_hub.util.JwtTokenUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

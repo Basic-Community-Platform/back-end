@@ -1,4 +1,4 @@
-package opensocial.org.community_hub.dto;
+package opensocial.org.community_hub.domain.user.dto;
 
 public class RefreshTokenRequest {
     private String refreshToken;

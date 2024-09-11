@@ -1,7 +1,7 @@
-package opensocial.org.community_hub.service;
+package opensocial.org.community_hub.domain.user.service;
 
-import opensocial.org.community_hub.entity.User;
-import opensocial.org.community_hub.repository.UserRepository;
+import opensocial.org.community_hub.domain.user.entity.User;
+import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

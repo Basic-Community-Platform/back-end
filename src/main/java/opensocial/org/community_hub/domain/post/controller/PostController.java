@@ -1,8 +1,8 @@
-package opensocial.org.community_hub.controller;
+package opensocial.org.community_hub.domain.post.controller;
 
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.entity.Post;
-import opensocial.org.community_hub.service.PostService;
+import opensocial.org.community_hub.domain.post.entity.Post;
+import opensocial.org.community_hub.domain.post.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

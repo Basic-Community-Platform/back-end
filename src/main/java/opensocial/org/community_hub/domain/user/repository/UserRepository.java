@@ -1,6 +1,6 @@
-package opensocial.org.community_hub.repository;
+package opensocial.org.community_hub.domain.user.repository;
 
-import opensocial.org.community_hub.entity.User;
+import opensocial.org.community_hub.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
