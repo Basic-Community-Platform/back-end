@@ -1,13 +1,18 @@
 package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
+import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -51,5 +56,24 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    public List<Post> searchPosts(SearchRequest searchRequest) {
+        String keyword = searchRequest.getKeyword();
+        PostSearchType searchType = searchRequest.getSearchType();
+
+        // 각 검색 타입에 따른 검색 로직
+        switch (searchType) {
+            case USERNAME:
+                System.out.println(postRepository.findByUser_NameContaining(keyword));
+                log.info("Searching posts by user name with keyword: {}", keyword);
+                return postRepository.findByUser_NameContaining(keyword);  // 유저명 검색 (대소문자 무시)
+            case TITLE:
+                return postRepository.findByTitleContaining(keyword);          // 제목 검색 (대소문자 무시)
+            case CONTENT:
+                return postRepository.findPostsByContentContaining(keyword);        // 내용 검색 (대소문자 무시)
+            default:
+                throw new IllegalArgumentException("Invalid search type");
+        }
     }
 }
