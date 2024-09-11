@@ -1,9 +1,8 @@
-package opensocial.org.community_hub.service;
+package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.entity.Post;
-import opensocial.org.community_hub.entity.User;
-import opensocial.org.community_hub.repository.PostRepository;
+import opensocial.org.community_hub.domain.post.entity.Post;
+import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,24 +13,20 @@ public class PostService {
 
     private final PostRepository postRepository;
 
-    public Post createPost(Post post, User user) {
-
-        post.setUser(user); // 게시글에 사용자 정보 추가
+    // 게시글 생성
+    public Post createPost(Post post) {
         return postRepository.save(post);
     }
 
+    // 게시글 조회
     public Optional<Post> getPostById(Long postId) {
         return postRepository.findById(postId);
     }
 
-    // 게시글 업데이트 (본인 게시글만 업데이트)
-    public Post updatePost(Long postId, Post postDetails, User user) {
+    // 게시글 업데이트
+    public Post updatePost(Long postId, Post postDetails) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
-
-        if (!post.getUser().getUserId().equals(user.getUserId())) {
-            throw new RuntimeException("You are not authorized to update this post");
-        }
 
         post.setTitle(postDetails.getTitle());
         post.setContent(postDetails.getContent());
@@ -41,15 +36,10 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    // 게시글 삭제 (본인 게시글만 삭제)
-    public void deletePost(Long postId, User user) {
+    // 게시글 삭제
+    public void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
-
-        if (!post.getUser().getUserId().equals(user.getUserId())) {
-            throw new RuntimeException("You are not authorized to delete this post");
-        }
-
         postRepository.delete(post);
     }
 }

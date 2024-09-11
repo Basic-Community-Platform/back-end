@@ -1,10 +1,10 @@
-package opensocial.org.community_hub.service;
+package opensocial.org.community_hub.domain.user.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.dto.TokenResponse;
-import opensocial.org.community_hub.entity.User;
-import opensocial.org.community_hub.repository.UserRepository;
+import opensocial.org.community_hub.domain.user.dto.TokenResponse;
+import opensocial.org.community_hub.domain.user.entity.User;
+import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import opensocial.org.community_hub.util.JwtTokenUtil;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
