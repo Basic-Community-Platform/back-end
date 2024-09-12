@@ -2,10 +2,9 @@ package opensocial.org.community_hub.domain.user.dto;
 
 import lombok.Getter;
 
+@Getter
 public class LoginResponse {
-    @Getter
     private String accessToken;
-    @Getter
     private String refreshToken;
     private String loginId;
     private String name;
