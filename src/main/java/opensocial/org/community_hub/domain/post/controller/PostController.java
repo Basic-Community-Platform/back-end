@@ -1,6 +1,7 @@
 package opensocial.org.community_hub.domain.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import opensocial.org.community_hub.domain.post.dto.PostDTO;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.service.PostService;
@@ -60,8 +61,8 @@ public class PostController {
 
     // username, title, content 중 선택하여 게시글 검색
     @PostMapping("/search")
-    public ResponseEntity<List<Post>> searchPosts(@RequestBody SearchRequest searchRequest) {
-        List<Post> posts = postService.searchPosts(searchRequest);
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestBody SearchRequest searchRequest) {
+        List<PostDTO> posts = postService.searchPosts(searchRequest);
         return ResponseEntity.ok(posts);
     }
 }
