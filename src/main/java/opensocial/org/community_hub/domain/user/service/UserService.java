@@ -39,30 +39,40 @@ public class UserService {
     }
 
     // 사용자 로그인 및 토큰 생성 (UserDetails 기반)
-    public LoginResponse login(User user) {
+    public LoginResponse login(String loginId, String password) {
         // loginId로 UserDetailsService를 통해 사용자 조회
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getLoginId());
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
 
+        // 사용자 존재 여부 확인
         if (userDetails == null) {
             throw new RuntimeException("Login ID does not exist");
         }
 
         // 비밀번호 일치 여부 확인
-        if (passwordEncoder.matches(user.getPassword(), userDetails.getPassword())) {
-            System.out.println("Password matches! Generating JWT...");
-            try {
-                // UserDetails를 기반으로 JWT 생성
-                String accessToken = jwtTokenUtil.generateToken(userDetails);
-                String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
-
-                return new LoginResponse(accessToken, refreshToken, user.getLoginId(), user.getName(), user.getEmail(), user.getProfileImageUrl());
-            } catch (Exception e) {
-                e.printStackTrace(); // 예외가 발생하면 로그 출력
-                throw new RuntimeException("Error during JWT token generation");
-            }
-        } else {
-            System.out.println("Password does not match!");
+        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+            log.warn("Invalid password for user: {}", loginId);
             throw new RuntimeException("Invalid password");
         }
+
+        log.info("Password matches for user: {}. Generating JWT...", loginId);
+
+        // JWT 토큰 생성
+        String accessToken;
+        String refreshToken;
+        try {
+            accessToken = jwtTokenUtil.generateToken(userDetails);
+            refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+        } catch (Exception e) {
+            log.error("Error during JWT token generation for user: {}", loginId, e);
+            throw new RuntimeException("Error during JWT token generation", e);
+        }
+
+        // loginId로 사용자 조회
+        User user = findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("User not found for login ID: " + loginId));
+
+        // 로그인 응답 생성
+        return new LoginResponse(accessToken, refreshToken, user.getLoginId(), user.getName(), user.getEmail(), user.getProfileImageUrl());
     }
+
 }
