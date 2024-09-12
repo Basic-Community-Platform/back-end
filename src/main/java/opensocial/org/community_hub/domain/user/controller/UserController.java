@@ -1,6 +1,6 @@
 package opensocial.org.community_hub.domain.user.controller;
 
-import opensocial.org.community_hub.domain.user.dto.TokenResponse;
+import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
@@ -12,8 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -48,13 +46,9 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         try {
-            TokenResponse tokenResponse = userService.login(user);
+            LoginResponse loginResponse = userService.login(user);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("accessToken", tokenResponse.getAccessToken());
-            response.put("refreshToken", tokenResponse.getRefreshToken());
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(loginResponse);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Invalid login credentials");
         }
@@ -70,7 +64,7 @@ public class UserController {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
             if (jwtTokenUtil.validateToken(request.getRefreshToken(), userDetails)) {
                 String newAccessToken = jwtTokenUtil.generateToken(userDetails);
-                return ResponseEntity.ok(new TokenResponse(newAccessToken, request.getRefreshToken()));
+                return ResponseEntity.ok(newAccessToken);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
             }
