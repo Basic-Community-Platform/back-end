@@ -2,7 +2,7 @@ package opensocial.org.community_hub.domain.user.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.domain.user.dto.TokenResponse;
+import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import opensocial.org.community_hub.util.JwtTokenUtil;
@@ -37,7 +37,7 @@ public class UserService {
     }
 
     // 사용자 로그인 및 토큰 생성 (UserDetails 기반)
-    public TokenResponse login(User user) {
+    public LoginResponse login(User user) {
         // loginId로 UserDetailsService를 통해 사용자 조회
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getLoginId());
 
@@ -53,7 +53,7 @@ public class UserService {
                 String accessToken = jwtTokenUtil.generateToken(userDetails);
                 String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
-                return new TokenResponse(accessToken, refreshToken);
+                return new LoginResponse(accessToken, refreshToken, user.getLoginId(), user.getName(), user.getEmail(), user.getProfileImageUrl());
             } catch (Exception e) {
                 e.printStackTrace(); // 예외가 발생하면 로그 출력
                 throw new RuntimeException("Error during JWT token generation");
