@@ -2,6 +2,7 @@ package opensocial.org.community_hub.domain.user.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -23,9 +25,9 @@ public class UserService {
     private final CustomUserDetailsService customUserDetailsService;
 
     public User registerUser(User user) {
-        // 비밀번호 인코딩
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User newUser = new User(user.getLoginId(), passwordEncoder.encode(user.getPassword()), user.getName(), user.getEmail(), user.getProfileImageUrl());
+
+        return userRepository.save(newUser);
     }
 
     public Optional<User> findByLoginId(String loginId) {
