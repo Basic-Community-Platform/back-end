@@ -8,6 +8,7 @@ import opensocial.org.community_hub.config.JwtConfig;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
@@ -23,7 +24,8 @@ public class JwtTokenUtil {
 
     // 서명에 사용할 키 반환
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
+        // UTF-8 인코딩을 적용하여 secretKey를 바이트 배열로 변환
+        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8));
     }
 
     // JWT에서 사용자 이름 추출 (해당 앱에선 loginId 추출)
