@@ -1,5 +1,6 @@
 package opensocial.org.community_hub.domain.user.controller;
 
+import opensocial.org.community_hub.domain.user.dto.LoginRequest;
 import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.domain.user.entity.User;
@@ -44,9 +45,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User user) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
-            LoginResponse loginResponse = userService.login(user);
+            LoginResponse loginResponse = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
 
             return ResponseEntity.ok(loginResponse);
         } catch (RuntimeException e) {
