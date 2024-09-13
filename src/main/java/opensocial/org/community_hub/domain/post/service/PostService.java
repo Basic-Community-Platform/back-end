@@ -68,17 +68,17 @@ public class PostService {
 
         switch (searchType) {
             case USERNAME:
-                return postRepository.findByUser_NameContaining(keyword)
+                return postRepository.findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
                         .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUser().getName()))
                         .toList();  // Post 엔티티를 PostDTO로 변환하여 반환
             case TITLE:
-                return postRepository.findByTitleContaining(keyword)
+                return postRepository.findByTitleContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
                         .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(),  post.getUser().getName()))
                         .toList();
             case CONTENT:
-                return postRepository.findPostsByContentContaining(keyword)
+                return postRepository.findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
                         .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUser().getName()))
                         .toList();
