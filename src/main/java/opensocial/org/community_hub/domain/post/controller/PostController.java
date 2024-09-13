@@ -65,4 +65,20 @@ public class PostController {
         List<PostDTO> posts = postService.searchPosts(searchRequest);
         return ResponseEntity.ok(posts);
     }
+
+    // 이전 게시물 조회
+    @GetMapping("/{postId}/previous")
+    public ResponseEntity<PostDTO> getPreviousPost(@PathVariable Long postId) {
+        return postService.findPreviousPost(postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // 다음 게시물 조회
+    @GetMapping("/{postId}/next")
+    public ResponseEntity<PostDTO> getNextPost(@PathVariable Long postId) {
+        return postService.findNextPost(postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

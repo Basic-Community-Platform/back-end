@@ -8,6 +8,7 @@ import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,5 +86,42 @@ public class PostService {
             default:
                 throw new IllegalArgumentException("Invalid search type");
         }
+    }
+
+    // 이전 게시물 찾기
+    public Optional<PostDTO> findPreviousPost(Long postId) {
+        List<Post> posts = postRepository.findPreviousPost(postId, PageRequest.of(0, 1));
+        if (posts.isEmpty()) {
+
+            return Optional.empty();
+        } else {
+            Post post = posts.get(0);
+            // Post 엔터티를 PostDTO로 변환하여 반환
+            return Optional.of(convertToDTO(post));
+        }
+    }
+
+    // 다음 게시물 찾기
+    public Optional<PostDTO> findNextPost(Long postId) {
+        List<Post> posts = postRepository.findNextPost(postId, PageRequest.of(0, 1));
+        if (posts.isEmpty()) {
+            return Optional.empty();
+        } else {
+            Post post = posts.get(0);
+            // Post 엔터티를 PostDTO로 변환하여 반환
+            return Optional.of(convertToDTO(post));
+        }
+    }
+
+    private PostDTO convertToDTO(Post post) {
+        return new PostDTO(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getCommentCount(),
+                post.getUser().getName()
+                //유저아이디?
+        );
     }
 }
