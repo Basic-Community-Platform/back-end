@@ -77,6 +77,8 @@ public class UserController {
 
 
     // JWT로 보호된 사용자 정보 조회
+    // 추후에 해당 기능 사용 시 @PathVariable 없이 @AuthenticationPrincipal 로만 받도록 수정 필요
+    // 현재는 프론트에서 전역 스토어에 필요한 정보 다 들고 있어서 사용 안 되는 중
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable Long userId, @AuthenticationPrincipal UserDetails currentUser) {
         System.out.println("Authenticated user: " + currentUser.getUsername());
