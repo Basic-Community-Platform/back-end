@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -125,10 +124,9 @@ public class PostService {
                 post.getUser().getName()
         );
     }
-
+    
+    //QueryDSL 사용한 DTO 리스트 리턴
     public List<PostDTO> getAllPosts() {
-        return postRepository.findAll().stream()
-                .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUser().getName()))
-                .collect(Collectors.toList());
+        return postRepository.findAllPostsAsDTO();
     }
 }
