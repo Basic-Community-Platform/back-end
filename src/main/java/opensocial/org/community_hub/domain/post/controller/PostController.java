@@ -48,14 +48,28 @@ public class PostController {
 
     // 게시글 업데이트 (로그인한 사용자만 수정 가능)
     @PutMapping("/{postId}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long postId, @RequestBody Post postDetails, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Post> updatePost(@PathVariable Long postId, @RequestBody Post postDetails, @AuthenticationPrincipal UserDetails userDetails) {
+        // UserDetails에서 로그인 ID 가져오기
+        String loginId = userDetails.getUsername();
+
+        // 로그인 ID로 실제 User 엔티티를 조회
+        User user = userService.findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Post updatedPost = postService.updatePost(postId, postDetails, user);
         return ResponseEntity.ok(updatedPost);
     }
 
     // 게시글 삭제 (로그인한 사용자만 삭제 가능)
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId, @AuthenticationPrincipal UserDetails userDetails) {
+        // UserDetails에서 로그인 ID 가져오기
+        String loginId = userDetails.getUsername();
+
+        // 로그인 ID로 실제 User 엔티티를 조회
+        User user = userService.findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         postService.deletePost(postId, user);
         return ResponseEntity.noContent().build();
     }
