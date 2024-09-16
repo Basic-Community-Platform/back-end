@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -122,7 +123,12 @@ public class PostService {
                 post.getViewCount(),
                 post.getCommentCount(),
                 post.getUser().getName()
-                //유저아이디?
         );
+    }
+
+    public List<PostDTO> getAllPosts() {
+        return postRepository.findAll().stream()
+                .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUser().getName()))
+                .collect(Collectors.toList());
     }
 }
