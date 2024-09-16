@@ -40,9 +40,10 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long postId) {
-        Optional<Post> post = postService.getPostById(postId);
-        return post.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Long postId) {
+        return postService.getPostById(postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // 게시글 업데이트 (로그인한 사용자만 수정 가능)
