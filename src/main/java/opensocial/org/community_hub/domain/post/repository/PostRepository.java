@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+    // name, title, content 기반 게시물 검색 기능
     @Query("SELECT p FROM Post p WHERE LOWER(REPLACE(p.user.name, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%'))")
     List<Post> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(@Param("keyword") String keyword);
 
