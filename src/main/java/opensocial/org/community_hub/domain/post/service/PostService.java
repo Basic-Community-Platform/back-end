@@ -31,8 +31,9 @@ public class PostService {
 
     // 게시글 조회
     @Transactional(readOnly = true)
-    public Optional<Post> getPostById(Long postId) {
-        return postRepository.findById(postId);
+    public Optional<PostDTO> getPostById(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        return post.map(this::convertToDTO);
     }
 
     // 게시글 업데이트 (본인 게시글만 업데이트)
