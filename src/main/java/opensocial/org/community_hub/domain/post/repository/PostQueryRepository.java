@@ -3,6 +3,6 @@ import opensocial.org.community_hub.domain.post.dto.PostDTO;
 
 import java.util.List;
 
-public interface PostRepositoryCustom {
+public interface PostQueryRepository {
     List<PostDTO> findAllPostsAsDTO();
 }
