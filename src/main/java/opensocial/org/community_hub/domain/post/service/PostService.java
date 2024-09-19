@@ -2,6 +2,7 @@ package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import opensocial.org.community_hub.common.UserCommonService;
 import opensocial.org.community_hub.domain.post.dto.PostDTO;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
@@ -22,11 +23,11 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserService userService;
+    private final UserCommonService userCommonService;
 
     // 게시글 생성
     public PostDTO createPost(Post post, UserDetails userDetails) {
-        User user = getUserByUserDetails(userDetails);
+        User user = userCommonService.getUserByUserDetails(userDetails);
 
         post.setUser(user); // 게시글에 사용자 정보 추가
         Post savedPost = postRepository.save(post);
@@ -45,7 +46,7 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
 
-        User user = getUserByUserDetails(userDetails);
+        User user = userCommonService.getUserByUserDetails(userDetails);
         if (!post.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("You are not authorized to update this post");
         }
@@ -61,7 +62,7 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
 
-        User user = getUserByUserDetails(userDetails);
+        User user = userCommonService.getUserByUserDetails(userDetails);
         if (!post.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
@@ -121,13 +122,5 @@ public class PostService {
     //QueryDSL 사용한 DTO 리스트 리턴
     public List<PostDTO> getAllPosts() {
         return postRepository.findAllPostsAsDTO();
-    }
-
-    private User getUserByUserDetails(UserDetails userDetails) {
-        String loginId = userDetails.getUsername(); // UserDetails에서 로그인 ID 가져오기
-
-        User user = userService.findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return user;
     }
 }
