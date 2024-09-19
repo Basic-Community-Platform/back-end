@@ -3,6 +3,7 @@ package opensocial.org.community_hub.config;
 import opensocial.org.community_hub.filter.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,6 +35,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users/register", "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // 허용 경로 설정
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()  // GET 메서드에 대한 특정 경로 허용
                         .anyRequest().authenticated()  // 나머지 요청은 인증 필요
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // 세션 비활성화 (JWT 사용)
