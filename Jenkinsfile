@@ -38,8 +38,13 @@ pipeline {
                     // Jenkins에서 환경 변수 불러오기
                     def gradleCommand = env.GRADLE_BUILD_COMMAND ?: './gradlew clean build'
 
-                    // JWT 환경 변수를 Gradle 빌드에 전달
-                    sh "${gradleCommand} -Djwt.secret-key=${JWT_SECRET_KEY} -Djwt.access-token-expire-time=${JWT_ACCESS_TOKEN_EXPIRE_TIME} -Djwt.refresh-token-expire-time=${JWT_REFRESH_TOKEN_EXPIRE_TIME}"
+                    // JWT 환경 변수를 명시적으로 Gradle 빌드에 전달
+                    sh """
+                        ./gradlew clean build \
+                        -Djwt.secret-key=${JWT_SECRET_KEY} \
+                        -Djwt.access-token-expire-time=${JWT_ACCESS_TOKEN_EXPIRE_TIME} \
+                        -Djwt.refresh-token-expire-time=${JWT_REFRESH_TOKEN_EXPIRE_TIME}
+                    """
                 }
             }
         }
