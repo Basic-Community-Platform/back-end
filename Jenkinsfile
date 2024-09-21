@@ -27,6 +27,9 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    // gradlew 파일에 실행 권한 부여
+                    sh 'chmod +x ./gradlew'
+
                     // Jenkins에서 환경 변수 불러오기
                     def gradleCommand = env.GRADLE_BUILD_COMMAND ?: './gradlew clean build'
                     sh gradleCommand
