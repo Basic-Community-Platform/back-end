@@ -8,10 +8,6 @@ pipeline {
         DOCKER_IMAGE_NAME = 'community-hub'
         DOCKER_CONTAINER_NAME = 'community-hub-container'
         DOCKER_PORT = '8080'
-
-        // JWT 만료 시간 하드코딩 (필요한 경우)
-        JWT_ACCESS_TOKEN_EXPIRE_TIME = '21600000'
-        JWT_REFRESH_TOKEN_EXPIRE_TIME = '604800000'
     }
 
     triggers {
@@ -40,8 +36,6 @@ pipeline {
                         sh """
                             ./gradlew clean build \
                             -Djwt.secret-key=$JWT_SECRET_KEY \
-                            -Djwt.access-token-expire-time=${JWT_ACCESS_TOKEN_EXPIRE_TIME} \
-                            -Djwt.refresh-token-expire-time=${JWT_REFRESH_TOKEN_EXPIRE_TIME}
                         """
                     }
                 }
