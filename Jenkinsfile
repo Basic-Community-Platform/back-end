@@ -8,6 +8,11 @@ pipeline {
         DOCKER_IMAGE_NAME = 'community-hub'
         DOCKER_CONTAINER_NAME = 'community-hub-container'
         DOCKER_PORT = '8080'
+
+        // JWT 환경 변수 (Jenkins Credentials로 저장된 값을 불러옴)
+        JWT_SECRET_KEY = credentials('JWT_SECRET_KEY')  // 'jwt.secret-key'에 해당하는 값
+        JWT_ACCESS_TOKEN_EXPIRE_TIME = credentials('JWT_ACCESS_TOKEN_EXPIRE_TIME')  // 'jwt.access-token-expire-time'
+        JWT_REFRESH_TOKEN_EXPIRE_TIME = credentials('JWT_REFRESH_TOKEN_EXPIRE_TIME')  // 'jwt.refresh-token-expire-time'
     }
 
     triggers {
@@ -32,7 +37,9 @@ pipeline {
 
                     // Jenkins에서 환경 변수 불러오기
                     def gradleCommand = env.GRADLE_BUILD_COMMAND ?: './gradlew clean build'
-                    sh gradleCommand
+
+                    // JWT 환경 변수를 Gradle 빌드에 전달
+                    sh "${gradleCommand} -Djwt.secret-key=${JWT_SECRET_KEY} -Djwt.access-token-expire-time=${JWT_ACCESS_TOKEN_EXPIRE_TIME} -Djwt.refresh-token-expire-time=${JWT_REFRESH_TOKEN_EXPIRE_TIME}"
                 }
             }
         }

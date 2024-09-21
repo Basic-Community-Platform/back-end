@@ -37,5 +37,3 @@ out/
 .vscode/
 
 ### Prolerties ###
-/src/main/resources/jwt.properties
-/src/main/resources/jenkins.properties
