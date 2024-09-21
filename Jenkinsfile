@@ -11,8 +11,8 @@ pipeline {
 
         // JWT 환경 변수 (Jenkins Credentials로 저장된 값을 불러옴)
         JWT_SECRET_KEY = credentials('JWT_SECRET_KEY')  // 'jwt.secret-key'에 해당하는 값
-        JWT_ACCESS_TOKEN_EXPIRE_TIME = credentials('JWT_ACCESS_TOKEN_EXPIRE_TIME')  // 'jwt.access-token-expire-time'
-        JWT_REFRESH_TOKEN_EXPIRE_TIME = credentials('JWT_REFRESH_TOKEN_EXPIRE_TIME')  // 'jwt.refresh-token-expire-time'
+        JWT_ACCESS_TOKEN_EXPIRE_TIME = '21600000'
+        JWT_REFRESH_TOKEN_EXPIRE_TIME = '604800000'
     }
 
     triggers {
