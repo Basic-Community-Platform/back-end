@@ -2,14 +2,12 @@ package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import opensocial.org.community_hub.common.UserCommonService;
 import opensocial.org.community_hub.domain.post.dto.PostDTO;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
-import opensocial.org.community_hub.domain.user.service.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +21,9 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserCommonService userCommonService;
 
     // 게시글 생성
-    public PostDTO createPost(Post post, UserDetails userDetails) {
-        User user = userCommonService.getUserByUserDetails(userDetails);
-
+    public PostDTO createPost(Post post, User user) {
         post.setUser(user); // 게시글에 사용자 정보 추가
         Post savedPost = postRepository.save(post);
         return convertToDTO(savedPost);
@@ -42,11 +37,10 @@ public class PostService {
     }
 
     // 게시글 업데이트 (본인 게시글만 업데이트)
-    public PostDTO updatePost(Long postId, Post postDetails, UserDetails userDetails) {
+    public PostDTO updatePost(Long postId, Post postDetails, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
 
-        User user = userCommonService.getUserByUserDetails(userDetails);
         if (!post.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("You are not authorized to update this post");
         }
@@ -58,11 +52,10 @@ public class PostService {
     }
 
     // 게시글 삭제 (본인 게시글만 삭제)
-    public void deletePost(Long postId, UserDetails userDetails) {
+    public void deletePost(Long postId, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
 
-        User user = userCommonService.getUserByUserDetails(userDetails);
         if (!post.getUser().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
