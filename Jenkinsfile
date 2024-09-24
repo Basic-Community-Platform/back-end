@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        GITHUB_CREDENTIALS_ID = credentials('github-credentials-id')  // Jenkins에 저장된 자격증명 ID
         GIT_BRANCH = 'dev'
         GITHUB_REPO_URL = 'https://github.com/Basic-Community-Platform/back-end.git'
         DOCKER_IMAGE_NAME = 'community-hub'
@@ -18,8 +19,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // github-credentials-id는 jenkins 환경변수에서 직접 받기
-                    git branch: "${GIT_BRANCH}", credentialsId: 'github-credentials-id', url: "${GITHUB_REPO_URL}"
+                    git branch: "${GIT_BRANCH}", credentialsId: "${GITHUB_CREDENTIALS_ID}", url: "${GITHUB_REPO_URL}"
                 }
             }
         }
