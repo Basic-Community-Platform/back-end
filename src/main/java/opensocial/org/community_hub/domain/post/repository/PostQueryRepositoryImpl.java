@@ -22,8 +22,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public List<PostDTO> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
+        QUser user = QUser.user;
         return queryFactory.select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -31,6 +33,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                         post.user.name
                 ))
                 .from(post)
+                .leftJoin(post.user, user)
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.user.name, keyword))
                 .fetch();
     }
@@ -38,8 +41,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public List<PostDTO> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
+        QUser user = QUser.user;
         return queryFactory.select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -47,6 +52,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                         post.user.name
                 ))
                 .from(post)
+                .leftJoin(post.user, user)
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.title, keyword))
                 .fetch();
     }
@@ -54,8 +60,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public List<PostDTO> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
+        QUser user = QUser.user;
         return queryFactory.select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -63,6 +71,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                         post.user.name
                 ))
                 .from(post)
+                .leftJoin(post.user, user)
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.content, keyword))
                 .fetch();
     }
@@ -70,8 +79,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public PostDTO findPreviousPost(Long postId) {
         QPost post = QPost.post;
+        QUser user = QUser.user;
         return queryFactory.select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -79,6 +90,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                         post.user.name
                 ))
                 .from(post)
+                .leftJoin(post.user, user)
                 .where(post.postId.lt(postId))
                 .orderBy(post.postId.desc())
                 .limit(1) // 하나의 결과만 반환하도록 limit 설정
@@ -88,8 +100,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public PostDTO findNextPost(Long postId) {
         QPost post = QPost.post;
+        QUser user = QUser.user;
         return queryFactory.select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -97,20 +111,11 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                         post.user.name
                 ))
                 .from(post)
+                .leftJoin(post.user, user)
                 .where(post.postId.gt(postId))
                 .orderBy(post.postId.asc())
                 .limit(1) // 하나의 결과만 반환하도록 limit 설정
                 .fetchOne();
-    }
-
-    private BooleanExpression containsIgnoreCaseAndIgnoreSpaces(StringPath path, String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return null;
-        }
-        String formattedKeyword = keyword.replace(" ", "").toLowerCase();
-        return Expressions.stringTemplate(
-                "LOWER(REPLACE({0}, ' ', ''))", path
-        ).contains(formattedKeyword);
     }
 
     @Override
@@ -121,6 +126,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
         return queryFactory
                 .select(new QPostDTO(
                         post.postId,
+                        user.loginId,  // loginId 추가
                         post.title,
                         post.content,
                         post.viewCount,
@@ -130,5 +136,15 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .from(post)
                 .leftJoin(post.user, user)
                 .fetch();
+    }
+
+    private BooleanExpression containsIgnoreCaseAndIgnoreSpaces(StringPath path, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return null;
+        }
+        String formattedKeyword = keyword.replace(" ", "").toLowerCase();
+        return Expressions.stringTemplate(
+                "LOWER(REPLACE({0}, ' ', ''))", path
+        ).contains(formattedKeyword);
     }
 }

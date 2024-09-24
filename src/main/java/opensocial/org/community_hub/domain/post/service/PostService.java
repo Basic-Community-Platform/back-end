@@ -8,7 +8,6 @@ import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,17 +71,17 @@ public class PostService {
             case USERNAME:
                 return postRepository.findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUserName()))
+                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
                         .toList();  // Post 엔티티를 PostDTO로 변환하여 반환
             case TITLE:
                 return postRepository.findByTitleContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(),  post.getUserName()))
+                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(),  postDTO.getUserName()))
                         .toList();
             case CONTENT:
                 return postRepository.findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(post -> new PostDTO(post.getPostId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getCommentCount(), post.getUserName()))
+                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
                         .toList();
             default:
                 throw new IllegalArgumentException("Invalid search type");
@@ -104,6 +103,7 @@ public class PostService {
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(
                 post.getPostId(),
+                post.getUser().getLoginId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),
@@ -111,7 +111,7 @@ public class PostService {
                 post.getUser().getName()
         );
     }
-    
+
     //QueryDSL 사용한 DTO 리스트 리턴
     public List<PostDTO> getAllPosts() {
         return postRepository.findAllPostsAsDTO();
