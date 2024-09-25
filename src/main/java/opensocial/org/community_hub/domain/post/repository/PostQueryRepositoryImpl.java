@@ -6,12 +6,13 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import opensocial.org.community_hub.domain.post.dto.PostDTO;
-import opensocial.org.community_hub.domain.post.dto.QPostDTO;
+import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.entity.QPost;
 import opensocial.org.community_hub.domain.user.entity.QUser;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,99 +24,117 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     public List<PostDTO> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
-        return queryFactory.select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        post.user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+
+        // QueryDsl과 Fetch Join을 사용해 엔티티 조회
+        List<Post> posts = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.user.name, keyword))
                 .fetch();
+
+        // DTO로 변환
+        return posts.stream()
+                .map(p -> new PostDTO(
+                        p.getPostId(),
+                        p.getUser().getLoginId(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.getViewCount(),
+                        p.getCommentCount(),
+                        p.getUser().getName()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<PostDTO> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
-        return queryFactory.select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        post.user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+
+        List<Post> posts = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.title, keyword))
                 .fetch();
+
+        return posts.stream()
+                .map(p -> new PostDTO(
+                        p.getPostId(),
+                        p.getUser().getLoginId(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.getViewCount(),
+                        p.getCommentCount(),
+                        p.getUser().getName()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<PostDTO> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
-        return queryFactory.select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        post.user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+
+        List<Post> posts = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.content, keyword))
                 .fetch();
+
+        return posts.stream()
+                .map(p -> new PostDTO(
+                        p.getPostId(),
+                        p.getUser().getLoginId(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.getViewCount(),
+                        p.getCommentCount(),
+                        p.getUser().getName()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public PostDTO findPreviousPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
-        return queryFactory.select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        post.user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+
+        Post result = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .where(post.postId.lt(postId))
                 .orderBy(post.postId.desc())
-                .limit(1) // 하나의 결과만 반환하도록 limit 설정
+                .limit(1)
                 .fetchOne();
+
+        return result != null ? new PostDTO(
+                result.getPostId(),
+                result.getUser().getLoginId(),
+                result.getTitle(),
+                result.getContent(),
+                result.getViewCount(),
+                result.getCommentCount(),
+                result.getUser().getName()
+        ) : null;
     }
 
     @Override
     public PostDTO findNextPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
-        return queryFactory.select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        post.user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+
+        Post result = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .where(post.postId.gt(postId))
                 .orderBy(post.postId.asc())
-                .limit(1) // 하나의 결과만 반환하도록 limit 설정
+                .limit(1)
                 .fetchOne();
+
+        return result != null ? new PostDTO(
+                result.getPostId(),
+                result.getUser().getLoginId(),
+                result.getTitle(),
+                result.getContent(),
+                result.getViewCount(),
+                result.getCommentCount(),
+                result.getUser().getName()
+        ) : null;
     }
 
     @Override
@@ -123,19 +142,21 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
-        return queryFactory
-                .select(new QPostDTO(
-                        post.postId,
-                        user.loginId,  // loginId 추가
-                        post.title,
-                        post.content,
-                        post.viewCount,
-                        post.commentCount,
-                        user.name
-                ))
-                .from(post)
-                .leftJoin(post.user, user)
+        List<Post> posts = queryFactory.selectFrom(post)
+                .leftJoin(post.user, user).fetchJoin()
                 .fetch();
+
+        return posts.stream()
+                .map(p -> new PostDTO(
+                        p.getPostId(),
+                        p.getUser().getLoginId(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.getViewCount(),
+                        p.getCommentCount(),
+                        p.getUser().getName()
+                ))
+                .collect(Collectors.toList());
     }
 
     private BooleanExpression containsIgnoreCaseAndIgnoreSpaces(StringPath path, String keyword) {
