@@ -37,4 +37,3 @@ out/
 .vscode/
 
 ### Prolerties ###
-/src/main/resources/jwt.properties

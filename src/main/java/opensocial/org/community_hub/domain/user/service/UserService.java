@@ -75,4 +75,9 @@ public class UserService {
         return new LoginResponse(accessToken, refreshToken, user.getLoginId(), user.getName(), user.getEmail(), user.getProfileImageUrl());
     }
 
+    public User getUserByUserDetails(UserDetails userDetails) {
+        String loginId = userDetails.getUsername();
+        return findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }
