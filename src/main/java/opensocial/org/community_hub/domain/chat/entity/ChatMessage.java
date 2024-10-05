@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "chat_message")
 public class ChatMessage {
 
     @Id
@@ -11,7 +12,6 @@ public class ChatMessage {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private MessageType type;
 
     @Column(nullable = false)
@@ -33,5 +33,61 @@ public class ChatMessage {
         LEAVE
     }
 
-    // 생성자 및 Getter, Setter 생략
+    public ChatMessage() {}
+
+    public ChatMessage(MessageType type, String content, String sender, ChatRoom chatRoom) {
+        this.type = type;
+        this.content = content;
+        this.sender = sender;
+        this.chatRoom = chatRoom;
+        this.timestamp = LocalDateTime.now();  // 메시지 생성 시 현재 시간으로 설정
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public MessageType getType() {
+        return type;
+    }
+
+    public void setType(MessageType type) {
+        this.type = type;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public ChatRoom getChatRoom() {
+        return chatRoom;
+    }
+
+    public void setChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
+    }
 }
