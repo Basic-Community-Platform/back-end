@@ -1,6 +1,7 @@
 package opensocial.org.community_hub.domain.chat.controller;
 
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomDto;
+import opensocial.org.community_hub.domain.chat.dto.ChatRoomRequest;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.service.ChatService;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,10 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    //추후에 요청 DTO 추가해서 변경하기
     @PostMapping("/room")
-    public ChatRoomDto createRoom(@RequestBody Map<String, String> request) {
-        return chatService.createChatRoom(request.get("name"));
+    public ChatRoomDto createRoom(@RequestBody ChatRoomRequest request) {
+        return chatService.createChatRoom(request.getName());
     }
-
 
     @GetMapping("/rooms")
     public List<ChatRoomDto> getAllRooms() {
