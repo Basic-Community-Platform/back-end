@@ -22,6 +22,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    //userRepository.findByLoginId(loginId): 일반적인 사용자 정보 조회 및 서비스 로직에서 사용.
+    //customUserDetailsService.loadUserByUsername(loginId): Spring Security의 인증 및 권한 부여 로직에서 사용.
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByLoginId(loginId);
