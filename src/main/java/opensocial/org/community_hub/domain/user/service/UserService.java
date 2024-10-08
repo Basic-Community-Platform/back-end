@@ -43,6 +43,7 @@ public class UserService {
         // loginId로 UserDetailsService를 통해 사용자 조회
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
 
+        // 이부분 나중에 수정. validate 따로 빼기
         // 사용자 존재 여부 확인
         if (userDetails == null) {
             throw new RuntimeException("Login ID does not exist");
@@ -67,12 +68,8 @@ public class UserService {
             throw new RuntimeException("Error during JWT token generation", e);
         }
 
-        // loginId로 사용자 조회
-        User user = findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("User not found for login ID: " + loginId));
-
         // 로그인 응답 생성
-        return new LoginResponse(accessToken, refreshToken, user.getLoginId(), user.getName(), user.getEmail(), user.getProfileImageUrl());
+        return new LoginResponse(accessToken, refreshToken);
     }
 
     public User getUserByUserDetails(UserDetails userDetails) {
