@@ -8,6 +8,7 @@ import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService
 import opensocial.org.community_hub.domain.user.service.UserService;
 import opensocial.org.community_hub.util.JwtTokenUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,7 +50,29 @@ public class UserController {
         try {
             LoginResponse loginResponse = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
 
-            return ResponseEntity.ok(loginResponse);
+            // Access Token 쿠키 설정
+            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", loginResponse.getAccessToken())
+                    .httpOnly(true)  // JavaScript에서 접근하지 못하도록 설정
+                    .secure(true)    // HTTPS를 통해서만 전송 (개발 환경에서는 false로 설정할 수 있음)
+                    .path("/")
+                    .maxAge(24 * 60 * 60)  // 쿠키 유효기간 설정 (초 단위)
+                    .sameSite("Strict")   // 쿠키의 SameSite 설정
+                    .build();
+
+            // Refresh Token 쿠키 설정
+            ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", loginResponse.getRefreshToken())
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(7 * 24 * 60 * 60)  // Refresh Token은 더 긴 유효기간을 가짐
+                    .sameSite("Strict")
+                    .build();
+
+            // 쿠키를 응답 헤더에 추가하여 클라이언트에게 전달
+            return ResponseEntity.ok()
+                    .header("Set-Cookie", accessTokenCookie.toString())
+                    .header("Set-Cookie", refreshTokenCookie.toString())
+                    .body("Login successful");
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Invalid login credentials");
         }
