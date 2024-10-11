@@ -24,10 +24,10 @@ public class UserService {
     private final JwtTokenUtil jwtTokenUtil; // JWT 유틸리티 주입
     private final CustomUserDetailsService customUserDetailsService;
 
-    public User registerUser(User user) {
+    public void registerUser(User user) {
         User newUser = new User(user.getLoginId(), passwordEncoder.encode(user.getPassword()), user.getName(), user.getEmail(), user.getProfileImageUrl());
 
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
     }
 
     public Optional<User> findByLoginId(String loginId) {
