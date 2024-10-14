@@ -28,19 +28,15 @@ public class UserController {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    //dto로 수정하기
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
-        // 사용자 등록 요청 처리
-        if (userService.existsByLoginId(user.getLoginId())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Login ID already exists");
+        try {
+            userService.registerUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
-
-        if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password cannot be empty");
-        }
-
-        userService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
     @PostMapping("/login")
