@@ -29,7 +29,6 @@ public class UserController {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    //dto로 수정하기
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody RegisterRequest registerRequest) {
         try {
