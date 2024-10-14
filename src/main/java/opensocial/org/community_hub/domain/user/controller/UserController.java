@@ -58,12 +58,12 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<String> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<String> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         try {
-            String username = jwtTokenUtil.extractUsername(request.getRefreshToken());
+            String username = jwtTokenUtil.extractUsername(refreshTokenRequest.getRefreshToken());
 
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-            if (jwtTokenUtil.validateToken(request.getRefreshToken(), userDetails)) {
+            if (jwtTokenUtil.validateToken(refreshTokenRequest.getRefreshToken(), userDetails)) {
                 String newAccessToken = jwtTokenUtil.generateToken(userDetails);
                 return ResponseEntity.ok(newAccessToken);  // 새 Access Token 문자열 반환
             }
