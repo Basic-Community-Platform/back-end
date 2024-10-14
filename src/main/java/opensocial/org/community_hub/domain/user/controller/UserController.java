@@ -2,6 +2,7 @@ package opensocial.org.community_hub.domain.user.controller;
 
 import opensocial.org.community_hub.domain.user.dto.LoginRequest;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
+import opensocial.org.community_hub.domain.user.dto.RegisterRequest;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
 import opensocial.org.community_hub.domain.user.service.UserService;
@@ -30,9 +31,9 @@ public class UserController {
 
     //dto로 수정하기
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest registerRequest) {
         try {
-            userService.registerUser(user);
+            userService.registerUser(registerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

@@ -2,6 +2,7 @@ package opensocial.org.community_hub.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import opensocial.org.community_hub.domain.user.dto.RegisterRequest;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.exception.UserNotFoundException;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
@@ -25,20 +26,20 @@ public class UserService {
     private final CustomUserDetailsService customUserDetailsService;
 
     // 회원 가입 메서드
-    public void registerUser(User user) {
-        if (existsByLoginId(user.getLoginId())) {
-            log.warn("Registration failed. Login ID already exists: {}", user.getLoginId());
+    public void registerUser(RegisterRequest registerRequest) {
+        if (existsByLoginId(registerRequest.getLoginId())) {
+            log.warn("Registration failed. Login ID already exists: {}", registerRequest.getLoginId());
             throw new IllegalArgumentException("Login ID already exists");
         }
 
-        User newUser = new User(user.getLoginId(),
-                passwordEncoder.encode(user.getPassword()),
-                user.getName(),
-                user.getEmail(),
-                user.getProfileImageUrl());
+        User newUser = new User(registerRequest.getLoginId(),
+                passwordEncoder.encode(registerRequest.getPassword()),
+                registerRequest.getName(),
+                registerRequest.getEmail(),
+                registerRequest.getProfileImageUrl());
 
         userRepository.save(newUser);
-        log.info("User registered successfully: {}", user.getLoginId());
+        log.info("User registered successfully: {}", registerRequest.getLoginId());
     }
 
     // 로그인 메서드 (JWT 토큰 생성만 처리)
