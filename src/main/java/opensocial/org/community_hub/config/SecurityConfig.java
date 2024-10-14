@@ -34,7 +34,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // CSRF 비활성화
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**").permitAll()  // 허용 경로 설정
+                        .requestMatchers("/api/users/login", "/api/users/register",
+                                "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**",
+                                //채팅방 관련 경로. 추후 조정
+                                "/api/chat/**", "/chat", "/ws/**").permitAll()  // 허용 경로 설정
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()  // GET 메서드에 대한 특정 경로 허용
                         .anyRequest().authenticated()  // 나머지 요청은 인증 필요
                 )
