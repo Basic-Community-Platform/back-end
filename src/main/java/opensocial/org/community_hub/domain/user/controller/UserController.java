@@ -1,7 +1,6 @@
 package opensocial.org.community_hub.domain.user.controller;
 
 import opensocial.org.community_hub.domain.user.dto.LoginRequest;
-import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
@@ -12,6 +11,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -45,11 +46,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Void> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
-            LoginResponse loginResponse = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
+            Map<String, String> tokens = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
 
             // Access Token 및 Refresh Token 쿠키 설정
-            ResponseCookie accessTokenCookie = createCookie("accessToken", loginResponse.getAccessToken(), 24 * 60 * 60);
-            ResponseCookie refreshTokenCookie = createCookie("refreshToken", loginResponse.getRefreshToken(), 7 * 24 * 60 * 60);
+            ResponseCookie accessTokenCookie = createCookie("accessToken", tokens.get("accessToken"), 24 * 60 * 60);
+            ResponseCookie refreshTokenCookie = createCookie("refreshToken", tokens.get("refreshToken"), 7 * 24 * 60 * 60);
 
             return ResponseEntity.ok()
                     .header("Set-Cookie", accessTokenCookie.toString())
