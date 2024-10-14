@@ -2,7 +2,6 @@ package opensocial.org.community_hub.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import opensocial.org.community_hub.domain.user.dto.LoginResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.exception.UserNotFoundException;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
@@ -11,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -40,8 +41,8 @@ public class UserService {
         log.info("User registered successfully: {}", user.getLoginId());
     }
 
-    // 로그인 메서드 (JWT 토큰 생성)
-    public LoginResponse login(String loginId, String password) {
+    // 로그인 메서드 (JWT 토큰 생성만 처리)
+    public Map<String, String> login(String loginId, String password) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
 
         // 사용자 유효성 검증
@@ -52,9 +53,14 @@ public class UserService {
         String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
         log.info("JWT Token generated for user: {}", loginId);
 
-        // 로그인 응답 생성
-        return new LoginResponse(accessToken, refreshToken);
+        // AccessToken과 RefreshToken을 Map으로 반환
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        return tokens;
     }
+
 
     // 사용자 로그인 ID로 조회
     public Optional<User> findByLoginId(String loginId) {
