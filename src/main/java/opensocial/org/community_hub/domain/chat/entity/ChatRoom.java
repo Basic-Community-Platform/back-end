@@ -11,12 +11,12 @@ public class ChatRoom {
     private String id;
 
     @Column(nullable = false)
-    private String name;
+    private String roomName;
 
-    public static ChatRoom create(String name) {
+    public static ChatRoom create(String roomName) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.id = UUID.randomUUID().toString();
-        chatRoom.name = name;
+        chatRoom.roomName = roomName;
         return chatRoom;
     }
 
@@ -29,10 +29,10 @@ public class ChatRoom {
     }
 
     public String getName() {
-        return name;
+        return roomName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String roomName) {
+        this.roomName = roomName;
     }
 }
