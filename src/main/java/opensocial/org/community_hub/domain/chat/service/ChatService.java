@@ -5,6 +5,7 @@ import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
 import opensocial.org.community_hub.domain.chat.repository.ChatRoomRepository;
+import opensocial.org.community_hub.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,37 +23,54 @@ public class ChatService {
         this.chatRoomRepository = chatRoomRepository;
     }
 
-    public ChatRoomDto createChatRoom(String name) {
-        ChatRoom chatRoom = ChatRoom.create(name);
+    // 채팅방 생성
+    public ChatRoomDto createChatRoom(String roomName) {
+        ChatRoom chatRoom = new ChatRoom(roomName);
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomDto(chatRoom.getId(), chatRoom.getName());
+        return new ChatRoomDto(chatRoom.getRoomName());
     }
 
-    public ChatRoomDto findRoomById(String roomId) {
+    // 특정 채팅방 조회
+    public ChatRoomDto findRoomById(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-        return new ChatRoomDto(chatRoom.getId(), chatRoom.getName());
+        return new ChatRoomDto(chatRoom.getRoomName());
     }
 
+    // 모든 채팅방 조회
     public List<ChatRoomDto> findAllRooms() {
         return chatRoomRepository.findAll().stream()
-                .map(room -> new ChatRoomDto(room.getId(), room.getName()))
+                .map(room -> new ChatRoomDto(room.getRoomName()))
                 .collect(Collectors.toList());
     }
 
-    public ChatMessage saveMessage(ChatMessage.MessageType type, String content, String sender, String roomId) {
-        // 해당 roomId로 채팅방 조회
+    // 특정 채팅방의 메시지 조회
+    public List<ChatMessage> getMessagesByRoomId(Long roomId) {
+        return chatMessageRepository.findByChatRoomId(roomId);
+    }
+
+    // 유저가 채팅방에 속해 있는지 검증하는 메서드
+    public void verifyUserInRoom(User user, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
 
-        // ChatMessage 객체 생성 시 현재 시간을 설정하여 timestamp 필드를 초기화
-        ChatMessage chatMessage = new ChatMessage(type, content, sender, chatRoom);
-        chatMessage.setTimestamp(LocalDateTime.now());  // 현재 시간을 timestamp로 설정
-
-        return chatMessageRepository.save(chatMessage);
+        // 유저가 해당 채팅방에 속해 있는지 확인
+        if (!chatRoom.getUsers().contains(user)) {
+            throw new IllegalArgumentException("User does not have access to this room");
+        }
     }
 
-    public List<ChatMessage> getMessagesByRoomId(String roomId) {
-        return chatMessageRepository.findByChatRoomId(roomId);
+    // 메시지 저장
+    public ChatMessage saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
+        // 유저가 해당 방에 속해 있는지 검증
+        verifyUserInRoom(user, roomId);
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+
+        ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
+        chatMessage.setTimestamp(LocalDateTime.now());
+
+        return chatMessageRepository.save(chatMessage);
     }
 }
