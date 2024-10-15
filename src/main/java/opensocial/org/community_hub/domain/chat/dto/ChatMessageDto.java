@@ -1,17 +1,19 @@
 package opensocial.org.community_hub.domain.chat.dto;
 
+import opensocial.org.community_hub.domain.user.entity.User;
+
 public class ChatMessageDto {
 
     private String type;
-    private String sender;
+    private User user;
     private String content;
     private String roomId;
 
     public ChatMessageDto() {}
 
-    public ChatMessageDto(String type, String sender, String content, String roomId) {
+    public ChatMessageDto(String type, User user, String content, String roomId) {
         this.type = type;
-        this.sender = sender;
+        this.user = user;
         this.content = content;
         this.roomId = roomId;
     }
@@ -24,12 +26,12 @@ public class ChatMessageDto {
         this.type = type;
     }
 
-    public String getSender() {
-        return sender;
+    public User getUser() {
+        return user;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getContent() {
