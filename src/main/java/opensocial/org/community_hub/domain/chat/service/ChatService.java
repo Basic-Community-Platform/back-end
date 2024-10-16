@@ -18,8 +18,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    public ChatService(ChatMessageRepository chatMessageRepository, ChatRoomRepository chatRoomRepository) {
-        this.chatMessageRepository = chatMessageRepository;
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository) {
         this.chatRoomRepository = chatRoomRepository;
     }
 
