@@ -7,6 +7,7 @@ import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.service.ChatService;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class ChatController {
     }
 
     @PostMapping("/room/{roomId}/message")
-    public ChatMessage sendMessage(
+    public ResponseEntity<String> sendMessage(
             @PathVariable Long roomId,
             @RequestParam String message,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -40,7 +41,9 @@ public class ChatController {
         chatService.verifyUserInRoom(user, roomId);
 
         // 메시지 저장
-        return chatService.saveMessage(ChatMessage.MessageType.CHAT, message, user, roomId);
+        chatService.saveMessage(ChatMessage.MessageType.CHAT, message, user, roomId);
+
+        return ResponseEntity.ok("Message sent successfully.");
     }
 
     @PostMapping("/room")

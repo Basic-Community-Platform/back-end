@@ -61,7 +61,7 @@ public class ChatService {
     }
 
     // 메시지 저장
-    public ChatMessage saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
+    public void saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
         // 유저가 해당 방에 속해 있는지 검증
         verifyUserInRoom(user, roomId);
 
@@ -70,7 +70,5 @@ public class ChatService {
 
         ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
         chatMessage.setTimestamp(LocalDateTime.now());
-
-        return chatMessageRepository.save(chatMessage);
     }
 }
