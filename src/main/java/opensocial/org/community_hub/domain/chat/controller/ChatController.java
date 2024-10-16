@@ -1,7 +1,6 @@
 package opensocial.org.community_hub.domain.chat.controller;
 
-import opensocial.org.community_hub.domain.chat.dto.ChatMessageDto;
-import opensocial.org.community_hub.domain.chat.dto.ChatRoomDto;
+import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomRequest;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.service.ChatService;
@@ -13,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -47,17 +45,17 @@ public class ChatController {
     }
 
     @PostMapping("/room")
-    public ChatRoomDto createRoom(@RequestBody ChatRoomRequest request) {
+    public ChatRoomResponse createRoom(@RequestBody ChatRoomRequest request) {
         return chatService.createChatRoom(request.getName());
     }
 
     @GetMapping("/rooms")
-    public List<ChatRoomDto> getAllRooms() {
+    public List<ChatRoomResponse> getAllRooms() {
         return chatService.findAllRooms();
     }
 
     @GetMapping("/room/{roomId}")
-    public ChatRoomDto getRoom(@PathVariable Long roomId) {
+    public ChatRoomResponse getRoom(@PathVariable Long roomId) {
         return chatService.findRoomById(roomId);
     }
 

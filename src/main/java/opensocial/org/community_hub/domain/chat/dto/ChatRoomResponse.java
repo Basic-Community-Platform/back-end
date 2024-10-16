@@ -1,13 +1,13 @@
 package opensocial.org.community_hub.domain.chat.dto;
 
-public class ChatRoomDto {
+public class ChatRoomResponse {
 
     private String name;
 
-    public ChatRoomDto() {
+    public ChatRoomResponse() {
     }
 
-    public ChatRoomDto(String name) {
+    public ChatRoomResponse(String name) {
         this.name = name;
     }
 

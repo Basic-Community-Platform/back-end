@@ -1,6 +1,6 @@
 package opensocial.org.community_hub.domain.chat.service;
 
-import opensocial.org.community_hub.domain.chat.dto.ChatRoomDto;
+import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
@@ -24,23 +24,23 @@ public class ChatService {
     }
 
     // 채팅방 생성
-    public ChatRoomDto createChatRoom(String roomName) {
+    public ChatRoomResponse createChatRoom(String roomName) {
         ChatRoom chatRoom = new ChatRoom(roomName);
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomDto(chatRoom.getRoomName());
+        return new ChatRoomResponse(chatRoom.getRoomName());
     }
 
     // 특정 채팅방 조회
-    public ChatRoomDto findRoomById(Long roomId) {
+    public ChatRoomResponse findRoomById(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-        return new ChatRoomDto(chatRoom.getRoomName());
+        return new ChatRoomResponse(chatRoom.getRoomName());
     }
 
     // 모든 채팅방 조회
-    public List<ChatRoomDto> findAllRooms() {
+    public List<ChatRoomResponse> findAllRooms() {
         return chatRoomRepository.findAll().stream()
-                .map(room -> new ChatRoomDto(room.getRoomName()))
+                .map(room -> new ChatRoomResponse(room.getRoomName()))
                 .collect(Collectors.toList());
     }
 
