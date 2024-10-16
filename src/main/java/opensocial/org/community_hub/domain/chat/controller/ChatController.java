@@ -69,4 +69,24 @@ public class ChatController {
     public List<ChatMessageResponse> getMessages(@PathVariable Long roomId) {
         return chatService.getMessagesByRoomId(roomId);
     }
+
+    // 채팅방에 유저 추가
+    @PostMapping("/room/{roomId}/addUser/{userId}")
+    public ResponseEntity<String> addUserToRoom(
+            @PathVariable Long roomId,
+            @PathVariable Long userId) {
+
+        chatService.addUserToRoom(roomId, userId);
+        return ResponseEntity.ok("User added to the room successfully.");
+    }
+
+    // 채팅방에서 유저 제거
+    @DeleteMapping("/room/{roomId}/removeUser/{userId}")
+    public ResponseEntity<String> removeUserFromRoom(
+            @PathVariable Long roomId,
+            @PathVariable Long userId) {
+
+        chatService.removeUserFromRoom(roomId, userId);
+        return ResponseEntity.ok("User removed from the room successfully.");
+    }
 }

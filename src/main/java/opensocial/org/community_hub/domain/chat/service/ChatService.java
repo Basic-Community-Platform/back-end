@@ -5,9 +5,9 @@ import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageQueryRepositoryImpl;
-import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
 import opensocial.org.community_hub.domain.chat.repository.ChatRoomRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
+import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,10 +19,12 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageQueryRepositoryImpl chatMessageQueryRepository;
+    private final UserRepository userRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository, UserRepository userRepository) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageQueryRepository = chatMessageQueryRepository;
+        this.userRepository = userRepository;
     }
 
     // 채팅방 생성
@@ -72,5 +74,37 @@ public class ChatService {
 
         ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
         chatMessage.setTimestamp(LocalDateTime.now());
+    }
+
+    // 채팅방에 유저 추가
+    public void addUserToRoom(Long roomId, Long userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 유저가 이미 채팅방에 있는지 확인
+        if (chatRoom.getUsers().contains(user)) {
+            throw new IllegalArgumentException("User already in the chat room");
+        }
+
+        // 채팅방에 유저 추가
+        chatRoom.addUser(user);
+        chatRoomRepository.save(chatRoom); // 변경 사항 저장
+    }
+
+
+    // 채팅방에서 유저 제거
+    public void removeUserFromRoom(Long roomId, Long userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 채팅방에서 유저 제거
+        chatRoom.removeUser(user);
+        chatRoomRepository.save(chatRoom); // 변경 사항 저장
     }
 }
