@@ -1,8 +1,10 @@
 package opensocial.org.community_hub.domain.chat.service;
 
+import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
+import opensocial.org.community_hub.domain.chat.repository.ChatMessageQueryRepositoryImpl;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
 import opensocial.org.community_hub.domain.chat.repository.ChatRoomRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
@@ -15,37 +17,38 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService {
 
-    private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageQueryRepositoryImpl chatMessageQueryRepository;
 
     public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository) {
         this.chatRoomRepository = chatRoomRepository;
+        this.chatMessageQueryRepository = chatMessageQueryRepository;
     }
 
     // 채팅방 생성
     public ChatRoomResponse createChatRoom(String roomName) {
         ChatRoom chatRoom = new ChatRoom(roomName);
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomResponse(chatRoom.getRoomName());
+        return new ChatRoomResponse(chatRoom.getRoomId(), chatRoom.getRoomName());
     }
 
     // 특정 채팅방 조회
     public ChatRoomResponse findRoomById(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-        return new ChatRoomResponse(chatRoom.getRoomName());
+        return new ChatRoomResponse(chatRoom.getRoomId(), chatRoom.getRoomName());
     }
 
     // 모든 채팅방 조회
     public List<ChatRoomResponse> findAllRooms() {
         return chatRoomRepository.findAll().stream()
-                .map(room -> new ChatRoomResponse(room.getRoomName()))
+                .map(room -> new ChatRoomResponse(room.getRoomId(), room.getRoomName()))
                 .collect(Collectors.toList());
     }
 
     // 특정 채팅방의 메시지 조회
-    public List<ChatMessage> getMessagesByRoomId(Long roomId) {
-        return chatMessageRepository.findByChatRoomId(roomId);
+    public List<ChatMessageResponse> getMessagesByRoomId(Long roomId) {
+        return chatMessageQueryRepository.findMessagesByRoomId(roomId);
     }
 
     // 유저가 채팅방에 속해 있는지 검증하는 메서드
