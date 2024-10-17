@@ -5,6 +5,7 @@ import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageQueryRepositoryImpl;
+import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
 import opensocial.org.community_hub.domain.chat.repository.ChatRoomRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageQueryRepositoryImpl chatMessageQueryRepository;
     private final UserRepository userRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository, UserRepository userRepository) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository, UserRepository userRepository) {
         this.chatRoomRepository = chatRoomRepository;
+        this.chatMessageRepository = chatMessageRepository;
         this.chatMessageQueryRepository = chatMessageQueryRepository;
         this.userRepository = userRepository;
     }
@@ -74,6 +77,8 @@ public class ChatService {
 
         ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
         chatMessage.setTimestamp(LocalDateTime.now());
+
+        chatMessageRepository.save(chatMessage);
     }
 
     // 채팅방에 유저 추가
