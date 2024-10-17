@@ -3,12 +3,15 @@ package opensocial.org.community_hub.domain.chat.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
+import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
 import opensocial.org.community_hub.domain.chat.entity.QChatMessage;
+import opensocial.org.community_hub.domain.chat.entity.QChatRoom;
 import opensocial.org.community_hub.domain.user.entity.QUser;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -41,5 +44,18 @@ public class ChatMessageQueryRepositoryImpl implements ChatMessageQueryRepositor
                         msg.getUser().getName(),
                         msg.getTimestamp()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<ChatRoom> findByIdWithUsers(Long roomId) {
+        QChatRoom chatRoom = QChatRoom.chatRoom;
+        QUser user = QUser.user;
+
+        ChatRoom result = queryFactory.selectFrom(chatRoom)
+                .leftJoin(chatRoom.users, user).fetchJoin()  // JOIN FETCH로 users 로드
+                .where(chatRoom.roomId.eq(roomId))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 }
