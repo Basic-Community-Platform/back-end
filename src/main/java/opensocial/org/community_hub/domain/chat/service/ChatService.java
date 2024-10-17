@@ -1,5 +1,6 @@
 package opensocial.org.community_hub.domain.chat.service;
 
+import jakarta.transaction.Transactional;
 import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
@@ -56,18 +57,7 @@ public class ChatService {
         return chatMessageQueryRepository.findMessagesByRoomId(roomId);
     }
 
-    // 유저가 채팅방에 속해 있는지 검증하는 메서드
-    public void verifyUserInRoom(User user, Long roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-
-        // 유저가 해당 채팅방에 속해 있는지 확인
-        if (!chatRoom.getUsers().contains(user)) {
-            throw new IllegalArgumentException("User does not have access to this room");
-        }
-    }
-
-    // 메시지 저장
+    @Transactional  // 트랜잭션 활성화
     public void saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
         // 유저가 해당 방에 속해 있는지 검증
         verifyUserInRoom(user, roomId);
@@ -79,6 +69,18 @@ public class ChatService {
         chatMessage.setTimestamp(LocalDateTime.now());
 
         chatMessageRepository.save(chatMessage);
+    }
+
+    @Transactional
+    public void verifyUserInRoom(User user, Long roomId) {
+        // QueryDSL로 users 컬렉션을 미리 로드
+        ChatRoom chatRoom = chatMessageQueryRepository.findByIdWithUsers(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+
+        // 유저가 해당 채팅방에 속해 있는지 확인
+        if (!chatRoom.getUsers().contains(user)) {
+            throw new IllegalArgumentException("User does not have access to this room");
+        }
     }
 
     // 채팅방에 유저 추가
@@ -98,7 +100,6 @@ public class ChatService {
         chatRoom.addUser(user);
         chatRoomRepository.save(chatRoom); // 변경 사항 저장
     }
-
 
     // 채팅방에서 유저 제거
     public void removeUserFromRoom(Long roomId, Long userId) {
