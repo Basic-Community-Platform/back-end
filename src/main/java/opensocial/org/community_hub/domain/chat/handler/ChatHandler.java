@@ -1,8 +1,7 @@
 package opensocial.org.community_hub.domain.chat.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import opensocial.org.community_hub.domain.chat.dto.ChatMessageDto;
-import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
+import opensocial.org.community_hub.domain.chat.dto.ChatMessageRequest;
 import opensocial.org.community_hub.domain.chat.service.ChatService;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.UserService;
@@ -45,39 +44,33 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
+        ChatMessageRequest chatMessageRequest = objectMapper.readValue(payload, ChatMessageRequest.class);
 
-        // JSON 메시지를 ChatMessageDto 객체로 파싱
-        ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
-
-        // 세션에서 사용자 정보 가져오기 (JWT 또는 인증 정보를 이용하여 세션 관리)
+        // 유저 정보 가져오기 (UserDetails에서 추출)
         UserDetails userDetails = (UserDetails) session.getPrincipal();
         User user = userService.findByLoginId(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with loginId: " + userDetails.getUsername()));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Long roomId = Long.parseLong(chatMessageDto.getRoomId());
-
-        // 유저가 해당 채팅방에 속해 있는지 확인
-        chatService.verifyUserInRoom(user, roomId);
+        // 채팅방에 속해 있는지 검증
+        chatService.verifyUserInRoom(user, chatMessageRequest.getRoomId());
 
         // 메시지 저장
-        chatService.saveMessage(
-                ChatMessage.MessageType.valueOf(chatMessageDto.getType()),
-                chatMessageDto.getContent(),
-                user,
-                roomId
-        );
+        chatService.saveMessage(chatMessageRequest.getType(), chatMessageRequest.getContent(), user, chatMessageRequest.getRoomId());
 
-        // 채팅방에 속한 사용자들에게만 메시지 브로드캐스트
-        for (WebSocketSession webSocketSession : sessions) {
-            if (webSocketSession.isOpen() && sessionRoomMap.get(webSocketSession).equals(roomId)) {
-                // chatMessageDto를 JSON으로 변환 후 전송
-                String broadcastMessage = objectMapper.writeValueAsString(chatMessageDto);
-                webSocketSession.sendMessage(new TextMessage(broadcastMessage));
+        // 모든 사용자에게 메시지 전송 (Broadcast)
+        broadcastMessageToRoom(chatMessageRequest.getRoomId(), message);
+    }
+
+    private void broadcastMessageToRoom(Long roomId, TextMessage message) {
+        sessionRoomMap.forEach((session, sessionRoomId) -> {
+            if (sessionRoomId.equals(roomId) && session.isOpen()) {
+                try {
+                    session.sendMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        // 세션이 속한 채팅방 정보 저장
-        sessionRoomMap.put(session, roomId);
+        });
     }
 
     @Override
