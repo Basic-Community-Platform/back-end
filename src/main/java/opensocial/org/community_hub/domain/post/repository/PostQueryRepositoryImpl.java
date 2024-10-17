@@ -20,6 +20,9 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    //fetch join을 사용한 뒤 DTO 프로젝션을 나중에 변환하는 방식
+    //불필요한 엔티티 조회, 필요 이상 데이터를 메모리에 로드해 비효율적
+    //추후 수정할 것
     @Override
     public List<PostDTO> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
