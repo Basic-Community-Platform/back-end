@@ -19,6 +19,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    // WebSocket 연결 시 JWT 인증 처리
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
