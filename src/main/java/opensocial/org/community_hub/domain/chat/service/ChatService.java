@@ -1,10 +1,15 @@
 package opensocial.org.community_hub.domain.chat.service;
 
-import opensocial.org.community_hub.domain.chat.dto.ChatRoomDto;
+import jakarta.transaction.Transactional;
+import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
+import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
 import opensocial.org.community_hub.domain.chat.entity.ChatRoom;
+import opensocial.org.community_hub.domain.chat.repository.ChatMessageQueryRepositoryImpl;
 import opensocial.org.community_hub.domain.chat.repository.ChatMessageRepository;
 import opensocial.org.community_hub.domain.chat.repository.ChatRoomRepository;
+import opensocial.org.community_hub.domain.user.entity.User;
+import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,45 +19,98 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService {
 
-    private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatMessageQueryRepositoryImpl chatMessageQueryRepository;
+    private final UserRepository userRepository;
 
-    public ChatService(ChatMessageRepository chatMessageRepository, ChatRoomRepository chatRoomRepository) {
-        this.chatMessageRepository = chatMessageRepository;
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ChatMessageQueryRepositoryImpl chatMessageQueryRepository, UserRepository userRepository) {
         this.chatRoomRepository = chatRoomRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.chatMessageQueryRepository = chatMessageQueryRepository;
+        this.userRepository = userRepository;
     }
 
-    public ChatRoomDto createChatRoom(String name) {
-        ChatRoom chatRoom = ChatRoom.create(name);
+    // 채팅방 생성
+    public ChatRoomResponse createChatRoom(String roomName) {
+        ChatRoom chatRoom = new ChatRoom(roomName);
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomDto(chatRoom.getId(), chatRoom.getName());
+        return new ChatRoomResponse(chatRoom.getRoomId(), chatRoom.getRoomName());
     }
 
-    public ChatRoomDto findRoomById(String roomId) {
+    // 특정 채팅방 조회
+    public ChatRoomResponse findRoomById(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-        return new ChatRoomDto(chatRoom.getId(), chatRoom.getName());
+        return new ChatRoomResponse(chatRoom.getRoomId(), chatRoom.getRoomName());
     }
 
-    public List<ChatRoomDto> findAllRooms() {
+    // 모든 채팅방 조회
+    public List<ChatRoomResponse> findAllRooms() {
         return chatRoomRepository.findAll().stream()
-                .map(room -> new ChatRoomDto(room.getId(), room.getName()))
+                .map(room -> new ChatRoomResponse(room.getRoomId(), room.getRoomName()))
                 .collect(Collectors.toList());
     }
 
-    public ChatMessage saveMessage(ChatMessage.MessageType type, String content, String sender, String roomId) {
-        // 해당 roomId로 채팅방 조회
+    // 특정 채팅방의 메시지 조회
+    public List<ChatMessageResponse> getMessagesByRoomId(Long roomId) {
+        return chatMessageQueryRepository.findMessagesByRoomId(roomId);
+    }
+
+    @Transactional  // 트랜잭션 활성화
+    public void saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
+        // 유저가 해당 방에 속해 있는지 검증
+        verifyUserInRoom(user, roomId);
+
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
 
-        // ChatMessage 객체 생성 시 현재 시간을 설정하여 timestamp 필드를 초기화
-        ChatMessage chatMessage = new ChatMessage(type, content, sender, chatRoom);
-        chatMessage.setTimestamp(LocalDateTime.now());  // 현재 시간을 timestamp로 설정
+        ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
+        chatMessage.setTimestamp(LocalDateTime.now());
 
-        return chatMessageRepository.save(chatMessage);
+        chatMessageRepository.save(chatMessage);
     }
 
-    public List<ChatMessage> getMessagesByRoomId(String roomId) {
-        return chatMessageRepository.findByChatRoomId(roomId);
+    @Transactional
+    public void verifyUserInRoom(User user, Long roomId) {
+        // QueryDSL로 users 컬렉션을 미리 로드
+        ChatRoom chatRoom = chatMessageQueryRepository.findByIdWithUsers(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+
+        // 유저가 해당 채팅방에 속해 있는지 확인
+        if (!chatRoom.getUsers().contains(user)) {
+            throw new IllegalArgumentException("User does not have access to this room");
+        }
+    }
+
+    // 채팅방에 유저 추가
+    public void addUserToRoom(Long roomId, Long userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 유저가 이미 채팅방에 있는지 확인
+        if (chatRoom.getUsers().contains(user)) {
+            throw new IllegalArgumentException("User already in the chat room");
+        }
+
+        // 채팅방에 유저 추가
+        chatRoom.addUser(user);
+        chatRoomRepository.save(chatRoom); // 변경 사항 저장
+    }
+
+    // 채팅방에서 유저 제거
+    public void removeUserFromRoom(Long roomId, Long userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 채팅방에서 유저 제거
+        chatRoom.removeUser(user);
+        chatRoomRepository.save(chatRoom); // 변경 사항 저장
     }
 }
