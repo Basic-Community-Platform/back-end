@@ -7,6 +7,7 @@ import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
 import opensocial.org.community_hub.domain.user.service.UserService;
 import opensocial.org.community_hub.util.JwtTokenUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +41,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             Map<String, String> tokens = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
 
-            // Access Token 및 Refresh Token 쿠키 설정
-            ResponseCookie accessTokenCookie = createCookie("accessToken", tokens.get("accessToken"), 24 * 60 * 60);
+            // Access Token은 인증 헤더에 세팅
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
+            // Refresh Token은 쿠키에 세팅
             ResponseCookie refreshTokenCookie = createCookie("refreshToken", tokens.get("refreshToken"), 7 * 24 * 60 * 60);
 
             return ResponseEntity.ok()
-                    .header("Set-Cookie", accessTokenCookie.toString())
+                    .headers(headers)
                     .header("Set-Cookie", refreshTokenCookie.toString())
-                    .body(null);
+                    .body("Login successful");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
