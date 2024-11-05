@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import opensocial.org.community_hub.domain.post.dto.PostResponse;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
+import opensocial.org.community_hub.domain.post.dto.UserInfoDTO;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
@@ -33,15 +34,7 @@ public class PostService {
     // 페이지네이션을 적용한 전체 게시글 조회
     public Page<PostResponse> getAllPosts(Pageable pageable) {
         return postRepository.findAll(pageable)
-                .map(post -> new PostResponse(
-                        post.getPostId(),
-                        post.getUser().getLoginId(),
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getViewCount(),
-                        post.getCommentCount(),
-                        post.getUser().getName()
-                ));
+                .map(this::convertToDTO);  // convertToDTO 메서드를 사용하여 변환
     }
 
     // 단일 게시글 조회
@@ -78,31 +71,19 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    // 게시글 검색 (이름, 제목, 내용에 따라)
     @Transactional(readOnly = true)
     public List<PostResponse> searchPosts(SearchRequest searchRequest) {
         String keyword = searchRequest.getKeyword();
         PostSearchType searchType = searchRequest.getSearchType();
 
-        switch (searchType) {
-            case USERNAME:
-                return postRepository.findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(keyword)
-                        .stream()
-                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
-                        .toList();  // Post 엔티티를 PostDTO로 변환하여 반환
-            case TITLE:
-                return postRepository.findByTitleContainingIgnoreCaseAndIgnoreSpaces(keyword)
-                        .stream()
-                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(),  postDTO.getUserName()))
-                        .toList();
-            case CONTENT:
-                return postRepository.findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(keyword)
-                        .stream()
-                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
-                        .toList();
-            default:
-                throw new IllegalArgumentException("Invalid search type");
-        }
+        return switch (searchType) {
+            case USERNAME -> postRepository.findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(keyword);
+            case TITLE -> postRepository.findByTitleContainingIgnoreCaseAndIgnoreSpaces(keyword);
+            case CONTENT -> postRepository.findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(keyword);
+        };
     }
+
 
     // 이전 게시물 찾기
     public Optional<PostResponse> findPreviousPost(Long postId) {
@@ -117,14 +98,20 @@ public class PostService {
     }
 
     private PostResponse convertToDTO(Post post) {
+        UserInfoDTO userInfo = new UserInfoDTO(
+                post.getUser().getLoginId(),
+                post.getUser().getName(),
+                post.getUser().getProfileImageUrl(),
+                post.getUser().getEmail()
+        );
+
         return new PostResponse(
                 post.getPostId(),
-                post.getUser().getLoginId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),
                 post.getCommentCount(),
-                post.getUser().getName()
+                userInfo
         );
     }
 
