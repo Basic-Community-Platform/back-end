@@ -3,8 +3,10 @@ package opensocial.org.community_hub.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import opensocial.org.community_hub.domain.user.dto.RegisterRequest;
+import opensocial.org.community_hub.domain.user.dto.UserDetailsResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.exception.UserNotFoundException;
+import opensocial.org.community_hub.domain.user.repository.UserQueryRepository;
 import opensocial.org.community_hub.domain.user.repository.UserRepository;
 import opensocial.org.community_hub.util.JwtTokenUtil;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +26,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserQueryRepository userQueryRepository;
 
     // 회원 가입 메서드
     public void registerUser(RegisterRequest registerRequest) {
@@ -90,5 +93,9 @@ public class UserService {
             log.warn("Invalid password for user: {}", userDetails.getUsername());
             throw new RuntimeException("Invalid password");
         }
+    }
+
+    public UserDetailsResponse getUserDetails(String userId) {
+        return userQueryRepository.findUserDetailsByLoginId(userId);
     }
 }
