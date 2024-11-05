@@ -7,6 +7,10 @@ import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.service.PostService;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,10 +35,14 @@ public class PostController {
         return ResponseEntity.ok(createdPost);
     }
 
-    // 전체 게시글 조회
+    // 페이지네이션을 적용한 전체 게시글 조회
     @GetMapping("")
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<PostResponse> posts = postService.getAllPosts();
+    public ResponseEntity<Page<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,            // 현재 페이지 (기본값 0)
+            @RequestParam(defaultValue = "10") int size            // 페이지 크기 (기본값 10)
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending()); // 최신순 정렬
+        Page<PostResponse> posts = postService.getAllPosts(pageable);
         return ResponseEntity.ok(posts);
     }
 
