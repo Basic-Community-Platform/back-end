@@ -50,4 +50,26 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
                 commentContents
         );
     }
+
+    @Override
+    public UserDetailsResponse findUserBasicInfoByLoginId(String loginId) {
+        QUser qUser = QUser.user;
+
+        User user = queryFactory.selectFrom(qUser)
+                .where(qUser.loginId.eq(loginId))
+                .fetchOne();
+
+        if (user == null) {
+            return null;
+        }
+
+        return new UserDetailsResponse(
+                user.getProfileImageUrl(),
+                user.getName(),
+                user.getLoginId(),
+                user.getEmail(),
+                null,  // postTitles를 null로 설정
+                null   // commentContents를 null로 설정
+        );
+    }
 }
