@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import opensocial.org.community_hub.domain.post.dto.PostResponse;
+import opensocial.org.community_hub.domain.post.dto.UserInfoDTO;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.entity.QPost;
 import opensocial.org.community_hub.domain.user.entity.QUser;
@@ -20,34 +21,23 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    //fetch join을 사용한 뒤 DTO 프로젝션을 나중에 변환하는 방식
-    //불필요한 엔티티 조회, 필요 이상 데이터를 메모리에 로드해 비효율적
-    //추후 수정할 것
+    // Username으로 검색
     @Override
     public List<PostResponse> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
-        // QueryDsl과 Fetch Join을 사용해 엔티티 조회
         List<Post> posts = queryFactory.selectFrom(post)
                 .leftJoin(post.user, user).fetchJoin()
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.user.name, keyword))
                 .fetch();
 
-        // DTO로 변환
         return posts.stream()
-                .map(p -> new PostResponse(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // Title로 검색
     @Override
     public List<PostResponse> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
@@ -59,18 +49,11 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostResponse(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // Content로 검색
     @Override
     public List<PostResponse> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
@@ -82,18 +65,11 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostResponse(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // 이전 게시물 찾기
     @Override
     public PostResponse findPreviousPost(Long postId) {
         QPost post = QPost.post;
@@ -106,17 +82,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostResponse(
-                result.getPostId(),
-                result.getUser().getLoginId(),
-                result.getTitle(),
-                result.getContent(),
-                result.getViewCount(),
-                result.getCommentCount(),
-                result.getUser().getName()
-        ) : null;
+        return result != null ? convertToPostResponse(result) : null;
     }
 
+    // 다음 게시물 찾기
     @Override
     public PostResponse findNextPost(Long postId) {
         QPost post = QPost.post;
@@ -129,17 +98,10 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostResponse(
-                result.getPostId(),
-                result.getUser().getLoginId(),
-                result.getTitle(),
-                result.getContent(),
-                result.getViewCount(),
-                result.getCommentCount(),
-                result.getUser().getName()
-        ) : null;
+        return result != null ? convertToPostResponse(result) : null;
     }
 
+    // 모든 게시물 조회
     @Override
     public List<PostResponse> findAllPostsAsDTO() {
         QPost post = QPost.post;
@@ -150,16 +112,27 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostResponse(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
+    }
+
+    // Post를 PostResponse로 변환
+    private PostResponse convertToPostResponse(Post post) {
+        UserInfoDTO userInfo = new UserInfoDTO(
+                post.getUser().getLoginId(),
+                post.getUser().getName(),
+                post.getUser().getProfileImageUrl(),
+                post.getUser().getEmail()
+        );
+
+        return new PostResponse(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getCommentCount(),
+                userInfo
+        );
     }
 
     private BooleanExpression containsIgnoreCaseAndIgnoreSpaces(StringPath path, String keyword) {
