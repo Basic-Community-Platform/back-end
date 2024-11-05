@@ -111,4 +111,12 @@ public class UserController {
 
     //유저 상세정보 - 일반적인 외부 열람용
     //권한 불필요
+    @GetMapping("/basic-info/{loginId}")
+    public ResponseEntity<UserDetailsResponse> getUserBasicInfo(@PathVariable("loginId") String loginId) {
+        UserDetailsResponse response = userService.getUserBasicInfo(loginId);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(response);
+    }
 }
