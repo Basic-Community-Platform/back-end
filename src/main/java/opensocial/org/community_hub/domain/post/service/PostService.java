@@ -8,6 +8,8 @@ import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
 import opensocial.org.community_hub.domain.post.repository.PostRepository;
 import opensocial.org.community_hub.domain.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,21 @@ public class PostService {
         return convertToDTO(savedPost);
     }
 
-    // 게시글 조회
+    // 페이지네이션을 적용한 전체 게시글 조회
+    public Page<PostResponse> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(post -> new PostResponse(
+                        post.getPostId(),
+                        post.getUser().getLoginId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getViewCount(),
+                        post.getCommentCount(),
+                        post.getUser().getName()
+                ));
+    }
+
+    // 단일 게시글 조회
     @Transactional(readOnly = true)
     public Optional<PostResponse> getPostById(Long postId) {
         Optional<Post> post = postRepository.findById(postId);
