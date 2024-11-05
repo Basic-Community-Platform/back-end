@@ -2,7 +2,7 @@ package opensocial.org.community_hub.domain.post.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import opensocial.org.community_hub.domain.post.dto.PostDTO;
+import opensocial.org.community_hub.domain.post.dto.PostResponse;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.enums.PostSearchType;
@@ -22,7 +22,7 @@ public class PostService {
     private final PostRepository postRepository;
 
     // 게시글 생성
-    public PostDTO createPost(Post post, User user) {
+    public PostResponse createPost(Post post, User user) {
         post.setUser(user); // 게시글에 사용자 정보 추가
         Post savedPost = postRepository.save(post);
         return convertToDTO(savedPost);
@@ -30,13 +30,13 @@ public class PostService {
 
     // 게시글 조회
     @Transactional(readOnly = true)
-    public Optional<PostDTO> getPostById(Long postId) {
+    public Optional<PostResponse> getPostById(Long postId) {
         Optional<Post> post = postRepository.findById(postId);
         return post.map(this::convertToDTO);
     }
 
     // 게시글 업데이트 (본인 게시글만 업데이트)
-    public PostDTO updatePost(Long postId, Post postDetails, User user) {
+    public PostResponse updatePost(Long postId, Post postDetails, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id " + postId));
 
@@ -63,7 +63,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostDTO> searchPosts(SearchRequest searchRequest) {
+    public List<PostResponse> searchPosts(SearchRequest searchRequest) {
         String keyword = searchRequest.getKeyword();
         PostSearchType searchType = searchRequest.getSearchType();
 
@@ -71,17 +71,17 @@ public class PostService {
             case USERNAME:
                 return postRepository.findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
+                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
                         .toList();  // Post 엔티티를 PostDTO로 변환하여 반환
             case TITLE:
                 return postRepository.findByTitleContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(),  postDTO.getUserName()))
+                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(),  postDTO.getUserName()))
                         .toList();
             case CONTENT:
                 return postRepository.findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(keyword)
                         .stream()
-                        .map(postDTO -> new PostDTO(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
+                        .map(postDTO -> new PostResponse(postDTO.getPostId(), postDTO.getLoginId(), postDTO.getTitle(), postDTO.getContent(), postDTO.getViewCount(), postDTO.getCommentCount(), postDTO.getUserName()))
                         .toList();
             default:
                 throw new IllegalArgumentException("Invalid search type");
@@ -89,19 +89,19 @@ public class PostService {
     }
 
     // 이전 게시물 찾기
-    public Optional<PostDTO> findPreviousPost(Long postId) {
-        PostDTO post = postRepository.findPreviousPost(postId);
+    public Optional<PostResponse> findPreviousPost(Long postId) {
+        PostResponse post = postRepository.findPreviousPost(postId);
         return Optional.ofNullable(post);
     }
 
     // 다음 게시물 찾기
-    public Optional<PostDTO> findNextPost(Long postId) {
-        PostDTO post = postRepository.findNextPost(postId);
+    public Optional<PostResponse> findNextPost(Long postId) {
+        PostResponse post = postRepository.findNextPost(postId);
         return Optional.ofNullable(post);
     }
 
-    private PostDTO convertToDTO(Post post) {
-        return new PostDTO(
+    private PostResponse convertToDTO(Post post) {
+        return new PostResponse(
                 post.getPostId(),
                 post.getUser().getLoginId(),
                 post.getTitle(),
@@ -113,7 +113,7 @@ public class PostService {
     }
 
     //QueryDSL 사용한 DTO 리스트 리턴
-    public List<PostDTO> getAllPosts() {
+    public List<PostResponse> getAllPosts() {
         return postRepository.findAllPostsAsDTO();
     }
 }

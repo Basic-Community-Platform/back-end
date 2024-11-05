@@ -5,7 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.domain.post.dto.PostDTO;
+import opensocial.org.community_hub.domain.post.dto.PostResponse;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.entity.QPost;
 import opensocial.org.community_hub.domain.user.entity.QUser;
@@ -24,7 +24,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     //불필요한 엔티티 조회, 필요 이상 데이터를 메모리에 로드해 비효율적
     //추후 수정할 것
     @Override
-    public List<PostDTO> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -36,7 +36,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
 
         // DTO로 변환
         return posts.stream()
-                .map(p -> new PostDTO(
+                .map(p -> new PostResponse(
                         p.getPostId(),
                         p.getUser().getLoginId(),
                         p.getTitle(),
@@ -49,7 +49,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     }
 
     @Override
-    public List<PostDTO> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -59,7 +59,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
+                .map(p -> new PostResponse(
                         p.getPostId(),
                         p.getUser().getLoginId(),
                         p.getTitle(),
@@ -72,7 +72,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     }
 
     @Override
-    public List<PostDTO> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -82,7 +82,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
+                .map(p -> new PostResponse(
                         p.getPostId(),
                         p.getUser().getLoginId(),
                         p.getTitle(),
@@ -95,7 +95,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     }
 
     @Override
-    public PostDTO findPreviousPost(Long postId) {
+    public PostResponse findPreviousPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -106,7 +106,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostDTO(
+        return result != null ? new PostResponse(
                 result.getPostId(),
                 result.getUser().getLoginId(),
                 result.getTitle(),
@@ -118,7 +118,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     }
 
     @Override
-    public PostDTO findNextPost(Long postId) {
+    public PostResponse findNextPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -129,7 +129,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostDTO(
+        return result != null ? new PostResponse(
                 result.getPostId(),
                 result.getUser().getLoginId(),
                 result.getTitle(),
@@ -141,7 +141,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     }
 
     @Override
-    public List<PostDTO> findAllPostsAsDTO() {
+    public List<PostResponse> findAllPostsAsDTO() {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -150,7 +150,7 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
+                .map(p -> new PostResponse(
                         p.getPostId(),
                         p.getUser().getLoginId(),
                         p.getTitle(),

@@ -4,7 +4,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 
 @Data
-public class PostDTO {
+public class PostResponse {
     private Long postId;
     private String loginId;
     private String title;
@@ -15,7 +15,7 @@ public class PostDTO {
 
     //QueryDSL을 사용해 QPostDTO 클래스 생성할 수 있도록 추가
     @QueryProjection
-    public PostDTO(Long postId, String loginId, String title, String content, int viewCount, int commentCount, String userName) {
+    public PostResponse(Long postId, String loginId, String title, String content, int viewCount, int commentCount, String userName) {
         this.postId = postId;
         this.loginId = loginId;
         this.title = title;

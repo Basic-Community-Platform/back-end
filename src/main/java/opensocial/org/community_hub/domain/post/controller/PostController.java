@@ -1,7 +1,7 @@
 package opensocial.org.community_hub.domain.post.controller;
 
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.domain.post.dto.PostDTO;
+import opensocial.org.community_hub.domain.post.dto.PostResponse;
 import opensocial.org.community_hub.domain.post.dto.SearchRequest;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.service.PostService;
@@ -24,23 +24,23 @@ public class PostController {
 
     // 게시글 생성 (로그인한 사용자 정보를 받아서 생성)
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody Post post, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<PostResponse> createPost(@RequestBody Post post, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUserDetails(userDetails);
-        PostDTO createdPost = postService.createPost(post, user); //Post 정보에 User 정보 연결
+        PostResponse createdPost = postService.createPost(post, user); //Post 정보에 User 정보 연결
 
         return ResponseEntity.ok(createdPost);
     }
 
     // 전체 게시글 조회
     @GetMapping("")
-    public ResponseEntity<List<PostDTO>> getAllPosts() {
-        List<PostDTO> posts = postService.getAllPosts();
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
     // 단일 게시글 조회
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDTO> getPostById(@PathVariable Long postId) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long postId) {
         return postService.getPostById(postId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -48,9 +48,9 @@ public class PostController {
 
     // 게시글 업데이트 (로그인한 사용자만 수정 가능)
     @PutMapping("/{postId}")
-    public ResponseEntity<PostDTO> updatePost(@PathVariable Long postId, @RequestBody Post postDetails, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long postId, @RequestBody Post postDetails, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUserDetails(userDetails);
-        PostDTO updatedPost = postService.updatePost(postId, postDetails, user);
+        PostResponse updatedPost = postService.updatePost(postId, postDetails, user);
         return ResponseEntity.ok(updatedPost);
     }
 
@@ -64,14 +64,14 @@ public class PostController {
 
     // username, title, content 중 선택하여 게시글 검색
     @PostMapping("/search")
-    public ResponseEntity<List<PostDTO>> searchPosts(@RequestBody SearchRequest searchRequest) {
-        List<PostDTO> posts = postService.searchPosts(searchRequest);
+    public ResponseEntity<List<PostResponse>> searchPosts(@RequestBody SearchRequest searchRequest) {
+        List<PostResponse> posts = postService.searchPosts(searchRequest);
         return ResponseEntity.ok(posts);
     }
 
     // 이전 게시물 조회
     @GetMapping("/{postId}/previous")
-    public ResponseEntity<PostDTO> getPreviousPost(@PathVariable Long postId) {
+    public ResponseEntity<PostResponse> getPreviousPost(@PathVariable Long postId) {
         return postService.findPreviousPost(postId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -79,7 +79,7 @@ public class PostController {
 
     // 다음 게시물 조회
     @GetMapping("/{postId}/next")
-    public ResponseEntity<PostDTO> getNextPost(@PathVariable Long postId) {
+    public ResponseEntity<PostResponse> getNextPost(@PathVariable Long postId) {
         return postService.findNextPost(postId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
