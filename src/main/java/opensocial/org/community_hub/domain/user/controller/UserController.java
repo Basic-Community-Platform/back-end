@@ -3,6 +3,7 @@ package opensocial.org.community_hub.domain.user.controller;
 import opensocial.org.community_hub.domain.user.dto.LoginRequest;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.domain.user.dto.RegisterRequest;
+import opensocial.org.community_hub.domain.user.dto.UserDetailsResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
 import opensocial.org.community_hub.domain.user.service.UserService;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,4 +88,27 @@ public class UserController {
                 .sameSite("Strict")
                 .build();
     }
+
+    //유저 상세정보 - 마이페이지용
+    //권한 필요
+    @GetMapping("/details")
+    public ResponseEntity<UserDetailsResponse> getUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByUserDetails(userDetails);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 로그인된 사용자의 기본 정보를 조회
+        UserDetailsResponse response = userService.getUserDetails(user.getLoginId());
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    //유저 상세정보 - 일반적인 외부 열람용
+    //권한 불필요
 }
