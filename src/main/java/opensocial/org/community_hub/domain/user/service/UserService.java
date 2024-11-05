@@ -98,4 +98,8 @@ public class UserService {
     public UserDetailsResponse getUserDetails(String userId) {
         return userQueryRepository.findUserDetailsByLoginId(userId);
     }
+
+    public UserDetailsResponse getUserBasicInfo(String loginId) {
+        return userQueryRepository.findUserBasicInfoByLoginId(loginId);
+    }
 }
