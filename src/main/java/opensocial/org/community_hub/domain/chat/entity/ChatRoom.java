@@ -1,38 +1,50 @@
 package opensocial.org.community_hub.domain.chat.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import opensocial.org.community_hub.domain.user.entity.User;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class ChatRoom {
 
     @Id
-    @Column(name = "room_id")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    private Long roomId;
 
+    @Setter
+    @Getter
     @Column(nullable = false)
-    private String name;
+    private String roomName;
 
-    public static ChatRoom create(String name) {
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.id = UUID.randomUUID().toString();
-        chatRoom.name = name;
-        return chatRoom;
+    // 채팅방에 속한 유저 목록
+    @ManyToMany
+    @JoinTable(
+            name = "chat_room_users", // 연결 테이블 이름
+            joinColumns = @JoinColumn(name = "room_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Getter
+    private Set<User> users = new HashSet<>();
+
+    public ChatRoom() {
     }
 
-    public String getId() {
-        return id;
+    public ChatRoom(String roomName) {
+        this.roomName = roomName;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    // 유저 추가 메서드
+    public void addUser(User user) {
+        this.users.add(user);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    // 유저 제거 메서드
+    public void removeUser(User user) {
+        this.users.remove(user);
     }
 }

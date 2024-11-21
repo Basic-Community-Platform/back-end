@@ -3,13 +3,16 @@ package opensocial.org.community_hub.domain.user.controller;
 import opensocial.org.community_hub.domain.user.dto.LoginRequest;
 import opensocial.org.community_hub.domain.user.dto.RefreshTokenRequest;
 import opensocial.org.community_hub.domain.user.dto.RegisterRequest;
+import opensocial.org.community_hub.domain.user.dto.UserDetailsResponse;
 import opensocial.org.community_hub.domain.user.entity.User;
 import opensocial.org.community_hub.domain.user.service.CustomUserDetailsService;
 import opensocial.org.community_hub.domain.user.service.UserService;
 import opensocial.org.community_hub.util.JwtTokenUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,18 +43,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             Map<String, String> tokens = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
 
-            // Access Token 및 Refresh Token 쿠키 설정
-            ResponseCookie accessTokenCookie = createCookie("accessToken", tokens.get("accessToken"), 24 * 60 * 60);
+            // Access Token은 인증 헤더에 세팅
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
+            // Refresh Token은 쿠키에 세팅
             ResponseCookie refreshTokenCookie = createCookie("refreshToken", tokens.get("refreshToken"), 7 * 24 * 60 * 60);
 
             return ResponseEntity.ok()
-                    .header("Set-Cookie", accessTokenCookie.toString())
+                    .headers(headers)
                     .header("Set-Cookie", refreshTokenCookie.toString())
-                    .body(null);
+                    .body("Login successful");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -82,5 +87,36 @@ public class UserController {
                 .maxAge(maxAge)
                 .sameSite("Strict")
                 .build();
+    }
+
+    //유저 상세정보 - 마이페이지용
+    //권한 필요
+    @GetMapping("/details")
+    public ResponseEntity<UserDetailsResponse> getUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByUserDetails(userDetails);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 로그인된 사용자의 기본 정보를 조회
+        UserDetailsResponse response = userService.getUserDetails(user.getLoginId());
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    //유저 상세정보 - 일반적인 외부 열람용
+    //권한 불필요
+    @GetMapping("/basic-info/{loginId}")
+    public ResponseEntity<UserDetailsResponse> getUserBasicInfo(@PathVariable("loginId") String loginId) {
+        UserDetailsResponse response = userService.getUserBasicInfo(loginId);
+        if (response == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(response);
     }
 }

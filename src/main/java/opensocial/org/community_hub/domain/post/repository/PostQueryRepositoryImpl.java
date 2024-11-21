@@ -5,7 +5,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import opensocial.org.community_hub.domain.post.dto.PostDTO;
+import opensocial.org.community_hub.domain.post.dto.PostResponse;
+import opensocial.org.community_hub.domain.post.dto.UserInfoDTO;
 import opensocial.org.community_hub.domain.post.entity.Post;
 import opensocial.org.community_hub.domain.post.entity.QPost;
 import opensocial.org.community_hub.domain.user.entity.QUser;
@@ -20,33 +21,25 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    // Username으로 검색
     @Override
-    public List<PostDTO> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findByUser_NameContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
-        // QueryDsl과 Fetch Join을 사용해 엔티티 조회
         List<Post> posts = queryFactory.selectFrom(post)
                 .leftJoin(post.user, user).fetchJoin()
                 .where(containsIgnoreCaseAndIgnoreSpaces(post.user.name, keyword))
                 .fetch();
 
-        // DTO로 변환
         return posts.stream()
-                .map(p -> new PostDTO(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // Title로 검색
     @Override
-    public List<PostDTO> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findByTitleContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -56,20 +49,13 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // Content로 검색
     @Override
-    public List<PostDTO> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
+    public List<PostResponse> findPostsByContentContainingIgnoreCaseAndIgnoreSpaces(String keyword) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -79,20 +65,13 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
     }
 
+    // 이전 게시물 찾기
     @Override
-    public PostDTO findPreviousPost(Long postId) {
+    public PostResponse findPreviousPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -103,19 +82,12 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostDTO(
-                result.getPostId(),
-                result.getUser().getLoginId(),
-                result.getTitle(),
-                result.getContent(),
-                result.getViewCount(),
-                result.getCommentCount(),
-                result.getUser().getName()
-        ) : null;
+        return result != null ? convertToPostResponse(result) : null;
     }
 
+    // 다음 게시물 찾기
     @Override
-    public PostDTO findNextPost(Long postId) {
+    public PostResponse findNextPost(Long postId) {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -126,19 +98,12 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .limit(1)
                 .fetchOne();
 
-        return result != null ? new PostDTO(
-                result.getPostId(),
-                result.getUser().getLoginId(),
-                result.getTitle(),
-                result.getContent(),
-                result.getViewCount(),
-                result.getCommentCount(),
-                result.getUser().getName()
-        ) : null;
+        return result != null ? convertToPostResponse(result) : null;
     }
 
+    // 모든 게시물 조회
     @Override
-    public List<PostDTO> findAllPostsAsDTO() {
+    public List<PostResponse> findAllPostsAsDTO() {
         QPost post = QPost.post;
         QUser user = QUser.user;
 
@@ -147,16 +112,27 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
                 .fetch();
 
         return posts.stream()
-                .map(p -> new PostDTO(
-                        p.getPostId(),
-                        p.getUser().getLoginId(),
-                        p.getTitle(),
-                        p.getContent(),
-                        p.getViewCount(),
-                        p.getCommentCount(),
-                        p.getUser().getName()
-                ))
+                .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
+    }
+
+    // Post를 PostResponse로 변환
+    private PostResponse convertToPostResponse(Post post) {
+        UserInfoDTO userInfo = new UserInfoDTO(
+                post.getUser().getLoginId(),
+                post.getUser().getName(),
+                post.getUser().getProfileImageUrl(),
+                post.getUser().getEmail()
+        );
+
+        return new PostResponse(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getCommentCount(),
+                userInfo
+        );
     }
 
     private BooleanExpression containsIgnoreCaseAndIgnoreSpaces(StringPath path, String keyword) {

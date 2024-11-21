@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -38,5 +39,20 @@ public class User {
         this.name = name;
         this.email = email;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    //엔티티 간의 동등성 비교와 컬렉션에서의 검색에 필요
+    //엔티티가 Set이나 Map과 같은 컬렉션에 저장될 때, 동등성 비교를 위해 오버라이딩 필요
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(userId, user.userId);  // 유니크한 필드로 비교
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId);
     }
 }
