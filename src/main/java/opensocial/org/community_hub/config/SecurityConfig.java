@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정 적용
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users/register",
-                                "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/api/users/refresh", "/swagger-ui/**", "/v3/api-docs/**", "/api/users/basic-info/**",
                                 //채팅방 관련 경로. 추후 조정
                                 "/api/chat/**", "/chat", "/ws/**").permitAll()  // 허용 경로 설정
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()  // GET 메서드에 대한 특정 경로 허용
@@ -65,6 +65,7 @@ public class SecurityConfig {
         config.setAllowedMethods(Collections.singletonList("*"));  // 모든 HTTP 메서드 허용
         config.setAllowedHeaders(Collections.singletonList("*"));  // 모든 헤더 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        config.setExposedHeaders(Arrays.asList("Authorization"));
         source.registerCorsConfiguration("/**", config);  // 모든 경로에 대해 CORS 설정 적용
         return source;
     }
