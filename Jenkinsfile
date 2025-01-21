@@ -7,7 +7,7 @@ pipeline {
         GITHUB_REPO_URL = 'https://github.com/Basic-Community-Platform/back-end.git'
         DOCKER_IMAGE_NAME = 'community-hub'
         DOCKER_CONTAINER_NAME = 'community-hub-container'
-        DOCKER_PORT = '8083'  // Docker 컨테이너 내부 포트 설정
+        DOCKER_PORT = '8083'
     }
 
     triggers {
@@ -55,9 +55,6 @@ pipeline {
             steps {
                 script {
                     def dockerContainerName = env.DOCKER_CONTAINER_NAME ?: 'community-hub-container'
-                    def dockerPort = env.DOCKER_PORT ?: '8083'  // 컨테이너 내부 포트
-
-                    // 컨테이너 실행 및 포트 매핑
                     sh """
                     docker stop ${dockerContainerName} || true
                     docker rm ${dockerContainerName} || true
