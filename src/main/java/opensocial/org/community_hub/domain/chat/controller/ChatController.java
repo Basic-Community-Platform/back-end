@@ -5,6 +5,8 @@ import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomRequest;
 import opensocial.org.community_hub.domain.chat.service.ChatService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +37,9 @@ public class ChatController {
     }
 
     @GetMapping("/room/{roomId}/messages")
-    public List<ChatMessageResponse> getMessages(@PathVariable Long roomId) {
-        return chatService.getMessagesByRoomId(roomId);
+    public List<ChatMessageResponse> getMessages(@PathVariable Long roomId, @AuthenticationPrincipal UserDetails userDetails) {
+        String loginId = userDetails.getUsername(); // UserDetails에서 loginId 가져오기
+        return chatService.getMessagesByRoomId(roomId, loginId);
     }
 
     // 채팅방에 유저 추가

@@ -1,42 +1,27 @@
 package opensocial.org.community_hub.domain.chat.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
+@AllArgsConstructor
 public class ChatMessageResponse {
     private String messageContent;
-    private String senderUsername;
+    private String senderUsername; // 사용자 이름
+    private String senderLoginId;  // 사용자 로그인 ID
     private LocalDateTime sentAt;
+    private Boolean isMyMessage;
+    private String profileImageUrl;
 
     @QueryProjection
-    public ChatMessageResponse(String messageContent, String senderUsername, LocalDateTime sentAt) {
+    public ChatMessageResponse(String messageContent, String senderUsername, String senderLoginId, LocalDateTime sentAt, String profileImageUrl) {
         this.messageContent = messageContent;
         this.senderUsername = senderUsername;
+        this.senderLoginId = senderLoginId;
         this.sentAt = sentAt;
-    }
-
-    public String getMessageContent() {
-        return messageContent;
-    }
-
-    public void setMessageContent(String messageContent) {
-        this.messageContent = messageContent;
-    }
-
-    public String getSenderUsername() {
-        return senderUsername;
-    }
-
-    public void setSenderUsername(String senderUsername) {
-        this.senderUsername = senderUsername;
-    }
-
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt;
+        this.profileImageUrl = profileImageUrl;
     }
 }

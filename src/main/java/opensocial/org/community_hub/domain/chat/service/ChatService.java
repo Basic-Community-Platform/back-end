@@ -96,11 +96,20 @@ public class ChatService {
     }
 
     // 특정 채팅방의 메시지 조회
-    public List<ChatMessageResponse> getMessagesByRoomId(Long roomId) {
-        return chatMessageQueryRepository.findMessagesByRoomId(roomId);
+    @Transactional
+    public List<ChatMessageResponse> getMessagesByRoomId(Long roomId, String loginId) {
+        List<ChatMessageResponse> messages = chatMessageQueryRepository.findMessagesByRoomId(roomId);
+
+        // 각 메시지의 isMyMessage 값을 설정
+        messages.forEach(message -> {
+            boolean isMyMessage = message.getSenderLoginId().equals(loginId);
+            message.setIsMyMessage(isMyMessage);
+        });
+
+        return messages;
     }
 
-    @Transactional  // 트랜잭션 활성화
+    @Transactional
     public void saveMessage(ChatMessage.MessageType type, String content, User user, Long roomId) {
         // 유저가 해당 방에 속해 있는지 검증
         verifyUserInRoom(user, roomId);
@@ -108,8 +117,8 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
 
+        // 수정된 생성자 사용
         ChatMessage chatMessage = new ChatMessage(type, content, user, chatRoom);
-        chatMessage.setTimestamp(LocalDateTime.now());
 
         chatMessageRepository.save(chatMessage);
     }
