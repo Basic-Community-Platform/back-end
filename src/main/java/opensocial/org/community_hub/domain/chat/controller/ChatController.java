@@ -46,7 +46,7 @@ public class ChatController {
     }
 
     // 채팅방에 유저 추가
-    @PostMapping("/room/{roomId}/addUser/{userId}")
+    @PostMapping("/room/{roomId}/addUser")
     public ResponseEntity<String> addUserToRoom(@PathVariable Long roomId, @PathVariable Long userId) {
 
         chatService.addUserToRoom(roomId, userId);
@@ -54,7 +54,7 @@ public class ChatController {
     }
 
     // 채팅방에서 유저 제거
-    @DeleteMapping("/room/{roomId}/removeUser/{userId}")
+    @DeleteMapping("/room/{roomId}/removeUser")
     public ResponseEntity<String> removeUserFromRoom(@PathVariable Long roomId, @PathVariable Long userId) {
 
         chatService.removeUserFromRoom(roomId, userId);
