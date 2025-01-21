@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import opensocial.org.community_hub.config.JwtConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +16,24 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
 
-    private final JwtConfig jwtConfig;
+    @Value("${jwt.secret-key}")
+    private String secretKey;
 
-    public JwtTokenUtil(JwtConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-    }
+    @Value("${jwt.access-token-expire-time}")
+    private long accessTokenExpireTime;
+
+    @Value("${jwt.refresh-token-expire-time}")
+    private long refreshTokenExpireTime;
 
     // 서명에 사용할 키 반환
     private Key getSigningKey() {
         // UTF-8 인코딩을 적용하여 secretKey를 바이트 배열로 변환
-        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     // JWT에서 사용자 이름 추출 (해당 앱에선 loginId 추출)
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject); //토큰 발급 시(아래 generateToken() 매서드) setSubject에 세팅한 값으로 claim 설정됨
+        return extractClaim(token, Claims::getSubject); // 토큰 발급 시 setSubject에 세팅한 값으로 claim 설정됨
     }
 
     // 특정 클레임 추출
@@ -56,12 +59,12 @@ public class JwtTokenUtil {
 
     // JWT 액세스 토큰 생성 (UserDetails 기반)
     public String generateToken(UserDetails userDetails) {
-        return generateToken(userDetails.getUsername(), jwtConfig.getAccessTokenExpireTime()); // 6시간 유효기간
+        return generateToken(userDetails.getUsername(), accessTokenExpireTime); // 6시간 유효기간
     }
 
     // JWT 리프레시 토큰 생성 (UserDetails 기반)
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails.getUsername(), jwtConfig.getRefreshTokenExpireTime()); // 7일 유효기간
+        return generateToken(userDetails.getUsername(), refreshTokenExpireTime); // 7일 유효기간
     }
 
     // JWT 토큰 생성
