@@ -46,19 +46,17 @@ public class UserController {
     public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
             Map<String, String> tokens = userService.login(loginRequest.getLoginId(), loginRequest.getPassword());
-
-            // Access Token은 인증 헤더에 세팅
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + tokens.get("accessToken"));
-            // Refresh Token은 쿠키에 세팅
             ResponseCookie refreshTokenCookie = createCookie("refreshToken", tokens.get("refreshToken"), 7 * 24 * 60 * 60);
-
             return ResponseEntity.ok()
                     .headers(headers)
                     .header("Set-Cookie", refreshTokenCookie.toString())
                     .body("Login successful");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            // 로그 추가
+            System.err.println("Login failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
