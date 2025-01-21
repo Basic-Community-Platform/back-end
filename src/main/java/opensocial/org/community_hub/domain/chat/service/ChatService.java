@@ -1,6 +1,7 @@
 package opensocial.org.community_hub.domain.chat.service;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.entity.ChatMessage;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
@@ -34,16 +36,16 @@ public class ChatService {
 
     // 채팅방 생성
     public ChatRoomResponse createChatRoom(String roomName) {
+        log.debug("Creating chat room: {}", roomName);
         ChatRoom chatRoom = new ChatRoom(roomName);
         chatRoomRepository.save(chatRoom);
 
-        // 초기값 설정 (새 채팅방은 메시지가 없으므로 null로 설정)
         return ChatRoomResponse.builder()
                 .roomId(chatRoom.getRoomId())
                 .name(chatRoom.getRoomName())
-                .profileImageUrl(null) // 새 채팅방은 초기 대표 이미지 없음
-                .createdAt(null) // 메시지가 없으므로 null
-                .updatedAt(null) // 메시지가 없으므로 null
+                .profileImageUrl(null)
+                .createdAt(null)
+                .updatedAt(null)
                 .build();
     }
 
