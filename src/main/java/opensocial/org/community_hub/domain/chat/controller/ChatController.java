@@ -1,5 +1,6 @@
 package opensocial.org.community_hub.domain.chat.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import opensocial.org.community_hub.domain.chat.dto.ChatMessageResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomResponse;
 import opensocial.org.community_hub.domain.chat.dto.ChatRoomRequest;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
+@Slf4j
 public class ChatController {
 
     private final ChatService chatService;
@@ -23,6 +25,7 @@ public class ChatController {
 
     @PostMapping("/room")
     public ChatRoomResponse createRoom(@RequestBody ChatRoomRequest request) {
+        log.debug("Received POST request to create room: {}", request.getName());
         return chatService.createChatRoom(request.getName());
     }
 
@@ -43,7 +46,7 @@ public class ChatController {
     }
 
     // 채팅방에 유저 추가
-    @PostMapping("/room/{roomId}/addUser/{userId}")
+    @PostMapping("/room/{roomId}/addUser")
     public ResponseEntity<String> addUserToRoom(@PathVariable Long roomId, @PathVariable Long userId) {
 
         chatService.addUserToRoom(roomId, userId);
@@ -51,7 +54,7 @@ public class ChatController {
     }
 
     // 채팅방에서 유저 제거
-    @DeleteMapping("/room/{roomId}/removeUser/{userId}")
+    @DeleteMapping("/room/{roomId}/removeUser")
     public ResponseEntity<String> removeUserFromRoom(@PathVariable Long roomId, @PathVariable Long userId) {
 
         chatService.removeUserFromRoom(roomId, userId);

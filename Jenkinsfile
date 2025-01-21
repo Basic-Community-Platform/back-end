@@ -7,7 +7,7 @@ pipeline {
         GITHUB_REPO_URL = 'https://github.com/Basic-Community-Platform/back-end.git'
         DOCKER_IMAGE_NAME = 'community-hub'
         DOCKER_CONTAINER_NAME = 'community-hub-container'
-        DOCKER_PORT = '8080'
+        DOCKER_PORT = '8083'
     }
 
     triggers {
@@ -55,11 +55,11 @@ pipeline {
             steps {
                 script {
                     def dockerContainerName = env.DOCKER_CONTAINER_NAME ?: 'community-hub-container'
-                    def dockerPort = env.DOCKER_PORT ?: '8080'
+                    def dockerPort = env.DOCKER_PORT ?: '8083'
                     sh """
                     docker stop ${dockerContainerName} || true
                     docker rm ${dockerContainerName} || true
-                    docker run -d -p 80:${dockerPort} --name ${dockerContainerName} \
+                    docker run -d -p 8083:${dockerPort} --name ${dockerContainerName} ${env.DOCKER_IMAGE_NAME}:latest \
                         -e JWT_SECRET_KEY=${JWT_SECRET_KEY} \
                         ${env.DOCKER_IMAGE_NAME}:latest
                     """
