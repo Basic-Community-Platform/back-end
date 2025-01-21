@@ -53,19 +53,20 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                script {
-                    def dockerContainerName = env.DOCKER_CONTAINER_NAME ?: 'community-hub-container'
-                    def dockerPort = env.DOCKER_PORT ?: '8083'
-                    sh """
-                    docker stop ${dockerContainerName} || true
-                    docker rm ${dockerContainerName} || true
-                    docker run -d -p 80:${dockerPort} --name ${dockerContainerName} \
-                        -e JWT_SECRET_KEY=${JWT_SECRET_KEY} \
-                        ${env.DOCKER_IMAGE_NAME}:latest
-                    """
+                withCredentials([string(credentialsId: 'JWT_SECRET_KEY', variable: 'JWT_SECRET_KEY')]) {
+                    script {
+                        def dockerContainerName = env.DOCKER_CONTAINER_NAME ?: 'community-hub-container'
+                        def dockerPort = env.DOCKER_PORT ?: '8083'
+                        echo "JWT_SECRET_KEY: ${JWT_SECRET_KEY}"
+                        sh """
+                        docker stop ${dockerContainerName} || true
+                        docker rm ${dockerContainerName} || true
+                        docker run -d -p 80:${dockerPort} --name ${dockerContainerName} \
+                            -e JWT_SECRET_KEY=${JWT_SECRET_KEY} \
+                            ${env.DOCKER_IMAGE_NAME}:latest
+                        """
+                    }
                 }
             }
-        }
-
     }
 }
