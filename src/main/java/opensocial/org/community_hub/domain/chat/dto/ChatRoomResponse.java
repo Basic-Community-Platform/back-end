@@ -1,31 +1,17 @@
 package opensocial.org.community_hub.domain.chat.dto;
 
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
 public class ChatRoomResponse {
 
     private Long roomId;
     private String name;
-
-    public ChatRoomResponse() {
-    }
-
-    public ChatRoomResponse(Long roomId, String name) {
-        this.roomId = roomId;
-        this.name = name;
-    }
-
-    public Long getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(Long roomId) {
-        this.roomId = roomId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    private String profileImageUrl;
+    private LocalDateTime createdAt; // 최초 메시지 보낸 시간
+    private LocalDateTime updatedAt; // 마지막으로 보낸 시간
 }
