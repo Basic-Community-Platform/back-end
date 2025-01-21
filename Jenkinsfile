@@ -55,11 +55,10 @@ pipeline {
             steps {
                 script {
                     def dockerContainerName = env.DOCKER_CONTAINER_NAME ?: 'community-hub-container'
-                    def dockerPort = env.DOCKER_PORT ?: '8083'
                     sh """
                     docker stop ${dockerContainerName} || true
                     docker rm ${dockerContainerName} || true
-                    docker run -d -p 8083:${dockerPort} --name ${dockerContainerName} ${env.DOCKER_IMAGE_NAME}:latest \
+                    docker run -d -p 8083:${dockerPort} --name ${dockerContainerName} \
                         -e JWT_SECRET_KEY=${JWT_SECRET_KEY} \
                         ${env.DOCKER_IMAGE_NAME}:latest
                     """
