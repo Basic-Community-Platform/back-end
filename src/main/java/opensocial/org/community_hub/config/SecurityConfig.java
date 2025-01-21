@@ -61,7 +61,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);  // 자격 증명 허용
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://board-project-two.vercel.app"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000",
+                "https://board-project-two.vercel.app",
+                "http://13.209.10.108:8081")); //스웨거용 백엔드 서버 URL
         config.setAllowedMethods(Collections.singletonList("*"));  // 모든 HTTP 메서드 허용
         config.setAllowedHeaders(Collections.singletonList("*"));  // 모든 헤더 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
